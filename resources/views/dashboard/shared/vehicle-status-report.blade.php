@@ -12,7 +12,6 @@
                     <div class="mb-6">
                         <input type="text" placeholder="Search Reg.id" class="border border-gray-300 rounded px-4 py-2">
                     </div>
-
                     <div class="mb-6">
                         <select class="border border-gray-300 rounded px-4 py-2">
                             <option>Last Month</option>

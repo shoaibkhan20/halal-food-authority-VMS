@@ -14,10 +14,10 @@
 
     <!-- Sidebar -->
     <aside class="w-64 bg-green-900 text-white flex flex-col items-center py-6">
-        <img src="{{ asset('images/logo.png') }}" class="h-20 mb-6" alt="Logo">
+        <a href="{{ route('dashboard') }}"> <img src="{{ asset('images/logo.png') }}" class="h-20 mb-6" alt="Logo"></a>
         <nav class="space-y-4 font-medium w-full px-6">
-            <a href="{{ route('dashboard') }}"
-                class="border-b block py-2 px-4  {{ request()->routeIs('dashboard') || request()->routeIs('vehicle.details') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Vehicle
+            <a href="{{ route('vehicles.info') }}"
+                class="border-b block py-2 px-4  {{ request()->routeIs('vehicles.info') || request()->routeIs('vehicle.details') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Vehicle
                 Information</a>
             <a href="{{ route('vehicle.tracking') }}"
                 class="border-b block py-2 px-4  {{ request()->routeIs('vehicle.tracking') || request()->routeIs('vehicle.liveLocation') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Vehicle
@@ -68,13 +68,11 @@
     <!-- Main Content -->
     <main class="flex-1">
         <!-- Background Image -->
-        <div class="w-full h-full bg-cover bg-bottom relative overflow-y-auto bg-gray-400"
+        <div class="w-full h-full bg-cover bg-bottom relative overflow-y-auto"
             >
             @yield('content')
         </div>
     </main>
-
-
 </body>
 <script src="{{ asset('js/daisyui.js') }}">
 </html >

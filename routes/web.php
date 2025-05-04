@@ -31,10 +31,11 @@ Route::middleware('auth')->group(function () {
     
     // Super Admin
     Route::prefix('super-admin')->middleware('role:super-admin')->group(function () {
-        Route::get('/', [VehicleController::class,'vehicles'])->name('dashboard');
+        Route::get('/', fn() => view('dashboard.super-admin.dashboard'))->name('dashboard');
+        Route::get('/vehicles', [VehicleController::class,'vehicles'])->name('vehicles.info');
         Route::get('/vehicle/{regid}',[VehicleController::class,'details'])->name('vehicle.details');
         Route::get('/tracking',[VehicleController::class,'tracking'])->name('vehicle.tracking');
-        Route::get('/maintenance', fn() => view('dashboard.shared.maintenance-history'))->name('vehicle.maintenance');
+        Route::get('/maintenance', [VehicleController::class,'MaintenanceHistory'])->name('vehicle.maintenance');
         Route::get('/role-management', [UserController::class,'index'])->name('users.role-management');
         Route::post('/users/store', [UserController::class,'store'])->name('users.store');   
         Route::put('/users/{user}', [UserController::class,'update'])->name('users.update');   

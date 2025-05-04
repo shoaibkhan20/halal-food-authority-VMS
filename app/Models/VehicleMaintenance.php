@@ -32,7 +32,7 @@ class VehicleMaintenance extends Model
     }
 
     // 🔗 Performed by a user
-    public function performedBy()
+    public function performed_by_user()
     {
         return $this->belongsTo(User::class, 'performed_by');
     }
