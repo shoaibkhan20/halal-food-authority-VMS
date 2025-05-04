@@ -15,6 +15,6 @@ class DatabaseSeeder extends Seeder
         // $this->call(UserAndRoleSeeder::class);
 
         // Seed all other tables (excluding user_roles)
-        $this->call(VmsSeeder::class);
+        $this->call([UserAndRoleSeeder::class, VmsSeeder::class]);
     }
 }

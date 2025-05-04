@@ -25,17 +25,15 @@ class VmsSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
-
         // 2. Users (using existing role_ids)
         $roleIds = DB::table('user_roles')->pluck('id')->toArray();
         $users = [];
         for ($i = 1; $i <= 10; $i++) {
             $users[] = DB::table('users')->insertGetId([
                 'name' => $faker->name,
-                'email' => $faker->unique()->safeEmail,
-                'phone_no' => $faker->phoneNumber,
-                'username' => 'user' . $i,
-                'password' => Hash::make('password123'),
+                'contact' => $faker->phoneNumber,
+                'username' => 'user' . $i . '_' . Str::random(3),
+                'password' => 'password123',
                 'branch_id' => $faker->randomElement($branches),
                 'role_id' => $faker->randomElement($roleIds),
                 'remember_token' => Str::random(10),
@@ -142,5 +140,21 @@ class VmsSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
+        // 10. Vehicle Maintenance (NEW BLOCK)
+        foreach ($maintenanceIds as $mid) {
+            DB::table('vehicle_maintenance')->insert([
+                'maintenance_request_id' => $mid,
+                'vehicle_id' => DB::table('maintenance_requests')->where('id', $mid)->value('vehicle_id'),
+                'status' => $faker->randomElement(['completed', 'in_progress', 'cancelled']),
+                'started_at' => now()->subDays(rand(2, 10)),
+                'completed_at' => now(),
+                'actual_cost' => $faker->randomFloat(2, 3000, 15000),
+                'maintenance_notes' => $faker->sentence,
+                'performed_by' => $faker->randomElement($users),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
     }
 }

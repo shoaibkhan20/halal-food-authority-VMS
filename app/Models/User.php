@@ -21,9 +21,11 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
+        'contact',
+        'username',
         'password',
-        'role'
+        'role_id',
+        'branch_id',
     ];
     public function role()
     {
@@ -34,7 +36,7 @@ class User extends Authenticatable
         // Adjust this based on your actual role implementation
         return $this->role === $role;
     }
-    
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);
@@ -55,7 +57,10 @@ class User extends Authenticatable
         return $this->hasMany(MaintenanceRequest::class, 'applied_by');
     }
 
-
+    public function performedMaintenance()
+    {
+        return $this->hasMany(VehicleMaintenance::class, 'performed_by');
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

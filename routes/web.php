@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -13,7 +15,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
-
 // ====================
 // 🔐 Authenticated Routes
 // ====================
@@ -27,15 +28,20 @@ Route::middleware('auth')->group(function () {
 
     // 🔁 Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
     
     // Super Admin
     Route::prefix('super-admin')->middleware('role:super-admin')->group(function () {
-        Route::get('/', [VehicleController::class,'index'])->name('dashboard');
-        Route::get('/vehicledetails/{regid}',[VehicleController::class,'details'])->name('vehicle.details');
-        Route::get('/vehicletracking',function(){
-            return view('dashboard.shared.vehicle-tracking');
-        })->name('vehicle.tracking');
+        Route::get('/', [VehicleController::class,'vehicles'])->name('dashboard');
+        Route::get('/vehicle/{regid}',[VehicleController::class,'details'])->name('vehicle.details');
+        Route::get('/tracking',[VehicleController::class,'tracking'])->name('vehicle.tracking');
+        Route::get('/maintenance', fn() => view('dashboard.shared.maintenance-history'))->name('vehicle.maintenance');
+        Route::get('/role-management', [UserController::class,'index'])->name('users.role-management');
+        Route::post('/users/store', [UserController::class,'store'])->name('users.store');   
+        Route::put('/users/{user}', [UserController::class,'update'])->name('users.update');   
+        Route::delete('/delete-user/{user}', [UserController::class,'destroy'])->name('users.delete');
+        Route::get('/reporting',[ReportController::class,'index'])->name('reports');
+        Route::get('/reporting/vehicle-status',[ReportController::class,'vehicleStatus'])->name('report.vehicle-status');
+        Route::get('/reporting/maintenance-report',[ReportController::class,'MaintenanceReport'])->name('report.maintenance');
     });
 
     //  Director Admin
@@ -46,7 +52,7 @@ Route::middleware('auth')->group(function () {
     // 
     //  Divisional User
     Route::prefix('divisional-user')->middleware('role:divisional-user')->group(function () {
-        Route::get('/', fn() => view('divisional-user.dashboard'))->name('divisional-user.dashboard');
+        Route::get('/', fn(): View => view('divisional-user.dashboard'))->name('divisional-user.dashboard');
     });
 
     //  District User

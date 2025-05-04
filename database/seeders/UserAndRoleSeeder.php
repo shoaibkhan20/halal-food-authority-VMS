@@ -26,9 +26,9 @@ class UserAndRoleSeeder extends Seeder
         }
         // Create super-admin user
         User::firstOrCreate(
-            ['email' => 'admin@example.com'],
+            ['contact' => 'admin@example.com'],
             [
-                'name' => 'Super Admin',
+                'name' => 'SuperAdmin',
                 'username' => 'superadmin',
                 'password' => Hash::make('password123'), // 👈 Change in production
                 'role_id' => UserRole::where('role_name', 'super-admin')->first()->id,

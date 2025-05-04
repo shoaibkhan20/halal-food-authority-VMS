@@ -36,5 +36,9 @@ class MaintenanceRequest extends Model
     {
         return $this->hasMany(VehicleSupervisorReport::class);
     }
+    public function maintenance()
+    {
+        return $this->hasMany(VehicleMaintenance::class);
+    }
 
 }

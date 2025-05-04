@@ -3,22 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Vehicle;
 class VehicleAssignment extends Model
 {
     protected static function booted()
     {
-        static::created(function ($assignment) {
-            Vehicle::where('RegID', $assignment->vehicle_id)
-                   ->update(['status' => 'Assigned']);
-        });
-
-        static::updated(function ($assignment) {
-            if ($assignment->returned_date) {
-                Vehicle::where('RegID', $assignment->vehicle_id)
-                       ->update(['status' => 'Free']);
-            }
-        });
+        parent::booted();
+        static::observe(\App\Observers\VehicleAssignmentObserver::class);
     }
 
     public function vehicle()

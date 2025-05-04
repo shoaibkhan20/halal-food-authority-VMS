@@ -27,7 +27,9 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = User::where('username', $credentials['username'])->first();
+        $user = User::where('username', $credentials['username'])
+                ->orWhere('contact', $credentials['username'])
+                ->first();
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             if ($isApi) {

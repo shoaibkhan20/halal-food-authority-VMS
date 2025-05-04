@@ -28,9 +28,8 @@ class CreateVmsTables extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone_no')->nullable();
-            $table->string('username')->unique();
+            $table->string('contact'); // required phone number
+            $table->string('username')->nullable()->unique(); // nullable username
             $table->string('password');
             $table->foreignId('branch_id')->nullable()->constrained('branches')->onDelete('set null');
             $table->foreignId('role_id')->nullable()->constrained('user_roles')->onDelete('set null');
@@ -47,6 +46,7 @@ class CreateVmsTables extends Migration
             $table->string('Region');
             $table->foreignId('branch_id')->nullable()->constrained('branches')->onDelete('set null');
             $table->float('Average_mileage')->nullable();
+            $table->string('status')->default('Available'); // Availible, Assigned
             $table->timestamps();
         });
 
@@ -103,6 +103,29 @@ class CreateVmsTables extends Migration
             $table->timestamps();
         });
 
+        Schema::create('vehicle_maintenance', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('maintenance_request_id')
+                ->constrained('maintenance_requests')
+                ->onDelete('cascade');
+            $table->string('vehicle_id');
+            $table->foreign('vehicle_id')
+                ->references('RegID')
+                ->on('vehicles')
+                ->onDelete('cascade');
+            $table->enum('status', ['not_started', 'in_progress', 'completed', 'cancelled'])
+                ->default('not_started');
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
+
+            $table->decimal('actual_cost', 10, 2)->nullable();
+            $table->text('maintenance_notes')->nullable();
+
+            $table->foreignId('performed_by')->nullable()->constrained('users')->onDelete('set null');
+
+            $table->timestamps();
+        });
+
         // 9. Vehicle Supervisor Reports Table
         Schema::create('vehicle_supervisor_reports', function (Blueprint $table) {
             $table->id();
@@ -128,6 +151,7 @@ class CreateVmsTables extends Migration
     {
         Schema::dropIfExists('fuel_requests');
         Schema::dropIfExists('vehicle_supervisor_reports');
+        Schema::dropIfExists('vehicle_maintenance');
         Schema::dropIfExists('maintenance_requests');
         Schema::dropIfExists('logbooks');
         Schema::dropIfExists('locations');

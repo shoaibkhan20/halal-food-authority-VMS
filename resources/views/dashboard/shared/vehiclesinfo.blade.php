@@ -4,7 +4,7 @@
 @section('content')
 
     <div class="w-full min-h-screen grid place-items-center">
-        <div class="w-[80%] h-full sm:h-[85vh] grid place-items-center rounded-lg bg-white backdrop:bg-gray/50">
+        <div class="w-[80%] h-full sm:h-[85vh] grid place-items-center rounded-lg bg-white">
             <div>
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-3xl font-bold">Vehicle Information</h1>
