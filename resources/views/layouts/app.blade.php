@@ -54,8 +54,6 @@
                     </a>
                 </div>
             </div>
-            
-
             <form method="POST" action="{{ route('logout') }}" class="block">
                 @csrf
                 <button type="submit" class="border-b w-full text-left py-2 px-4 hover:bg-green-800 ">
@@ -64,7 +62,6 @@
             </form>
         </nav>
     </aside>
-
     <!-- Main Content -->
     <main class="flex-1">
         <!-- Background Image -->

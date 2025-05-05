@@ -33,10 +33,10 @@
 
         <div class="modal-box" style="width: 800px; height: 550px; max-width: none;">
             <!-- Map Section -->
-            <div id="map" class="w-full m-10 rounded" style="height: 350px;"></div>
+            <div id="map" class="w-full rounded" style="height: 350px;"></div>
 
             <!-- Bottom Section: Info Table -->
-            <div class="overflow-auto" style="height: 150px;">
+            <div class="" style="height: 150px;">
                 <table class="table table-zebra w-full text-sm">
                     <thead>
                         <tr class="bg-gray-200 text-gray-800">
