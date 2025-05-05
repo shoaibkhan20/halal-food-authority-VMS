@@ -25,31 +25,30 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/home', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
-
-    // 🔁 Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
+
+    Route::middleware('role:super-admin,director-admin')->group(function () {
+        Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
+        Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
+        Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
+    });
     // Super Admin
     Route::prefix('super-admin')->middleware('role:super-admin')->group(function () {
-        Route::get('/', fn() => view('dashboard.super-admin.dashboard'))->name('dashboard');
-        Route::get('/vehicles', [VehicleController::class,'vehicles'])->name('vehicles.info');
-        Route::get('/vehicle/{regid}',[VehicleController::class,'details'])->name('vehicle.details');
-        Route::get('/tracking',[VehicleController::class,'tracking'])->name('vehicle.tracking');
-        Route::get('/maintenance', [VehicleController::class,'MaintenanceHistory'])->name('vehicle.maintenance');
-        Route::get('/role-management', [UserController::class,'index'])->name('users.role-management');
-        Route::post('/users/store', [UserController::class,'store'])->name('users.store');   
-        Route::put('/users/{user}', [UserController::class,'update'])->name('users.update');   
-        Route::delete('/delete-user/{user}', [UserController::class,'destroy'])->name('users.delete');
-        Route::get('/reporting',[ReportController::class,'index'])->name('reports');
-        Route::get('/reporting/vehicle-status',[ReportController::class,'vehicleStatus'])->name('report.vehicle-status');
-        Route::get('/reporting/maintenance-report',[ReportController::class,'MaintenanceReport'])->name('report.maintenance');
+        Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('super-admin.dashboard');
+        Route::get('/maintenance', [VehicleController::class, 'MaintenanceHistory'])->name('vehicle.maintenance');
+        Route::get('/role-management', [UserController::class, 'index'])->name('users.role-management');
+        Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/delete-user/{user}', [UserController::class, 'destroy'])->name('users.delete');
+        Route::get('/reporting', [ReportController::class, 'index'])->name('reports');
+        Route::get('/reporting/vehicle-status', [ReportController::class, 'vehicleStatus'])->name('report.vehicle-status');
+        Route::get('/reporting/maintenance-report', [ReportController::class, 'MaintenanceReport'])->name('report.maintenance');
     });
 
     //  Director Admin
     Route::prefix('director-admin')->middleware('role:director-admin')->group(function () {
-        Route::get('/', fn() => view('director-admin.dashboard'))->name('director-admin.dashboard');
+        Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('director-admin.dashboard');
     });
-
     // 
     //  Divisional User
     Route::prefix('divisional-user')->middleware('role:divisional-user')->group(function () {

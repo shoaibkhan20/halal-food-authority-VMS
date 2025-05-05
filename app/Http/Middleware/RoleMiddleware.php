@@ -15,17 +15,16 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle($request, Closure $next, $role)
+    public function handle($request, Closure $next, ...$roles)
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
         $user = Auth::user();
-
-        if (!$user->role || $user->role->role_name !== $role) {
-            abort(403, 'Unauthorized access - role mismatch.');
+        if (!$user->role || !in_array($user->role->role_name, $roles)) {
+            abort(403, 'Unauthorized access - role mismatch ');
         }
-
         return $next($request);
     }
+
 }
