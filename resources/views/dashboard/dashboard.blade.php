@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6">
+<div class="">
   <!-- Header -->
-  <div class=" mb-6">
-    <h1 class="text-xl font-bold">Dashboard</h1>
+  <div class="mb-6">
+    <p class="text-[10px] capitalize">{{Auth::User()->role->role_name }}</p>
+    <h1 class="text-xl font-bold"> Dashboard</h1>
   </div>
 
   <!-- Stat Cards -->
@@ -52,22 +53,31 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
+  const doughnutLabels = @json(array_map('ucfirst', array_keys($applicationStatusData)));
   const doughnutData = @json(array_values($applicationStatusData));
-  const lineLabels = @json($labels);
+  const lineLabels = @json(array_values($labels));
   const lineData = @json($costData);
 
-  window.addEventListener('DOMContentLoaded', () => {
-    // Line Chart
+  console.log('Doughnut Labels:', doughnutLabels);
+  console.log('Doughnut Data:', doughnutData);
+  console.log('Line Labels:', lineLabels);
+  console.log('Line Data:', lineData);
+
+  document.addEventListener('DOMContentLoaded', function () {
     const lineCtx = document.getElementById('lineChart');
+    const doughnutCtx = document.getElementById('doughnutChart');
+
     if (lineCtx) {
       new Chart(lineCtx.getContext('2d'), {
         type: 'line',
         data: {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+          labels: lineLabels,
           datasets: [{
             label: 'Cost',
-            data: [5000, 8000, 7500, 6000, 9500],
+            data: lineData,
             fill: true,
             borderColor: '#10b981',
             backgroundColor: 'rgba(16, 185, 129, 0.2)',
@@ -81,16 +91,14 @@
       });
     }
 
-    // Doughnut Chart
-    const doughnutCtx = document.getElementById('doughnutChart');
     if (doughnutCtx) {
       new Chart(doughnutCtx.getContext('2d'), {
         type: 'doughnut',
         data: {
-          labels: ['Approved', 'Pending', 'Rejected'],
+          labels: doughnutLabels,
           datasets: [{
-            data: [60, 30, 10],
-            backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+            data: doughnutData,
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444','#ef4666','#f57d97','#ef22445']
           }]
         },
         options: {

@@ -30,42 +30,41 @@ class DashboardController extends Controller
             case 'district-user':
                 return redirect()->route('director-admin.dashboard');
             case 'committe-user':
-                return redirect()->route('director-admin.dashboard');
+                return redirect()->route('committe-user.dashboard');
             default:
                 abort(403, 'Unauthorized');
         }
     }
 
 
-    function dashboardStatistics()
+    public function dashboardStatistics()
     {
         // Summary counts
         $totalFuelRequests = FuelRequest::count();
         $pendingMaintenanceRequests = MaintenanceRequest::where('status', 'pending')->count();
         $totalVehicles = Vehicle::count();
         $totalApplications = $totalFuelRequests + $pendingMaintenanceRequests;
-    
-        // Application status counts for doughnut chart
-        $applicationStatusData = [
-            'approved' => MaintenanceRequest::where('status', 'approved')->count(),
-            'pending' => MaintenanceRequest::where('status', 'pending')->count(),
-            'rejected' => MaintenanceRequest::where('status', 'rejected')->count(),
-        ];
-    
-        // Maintenance cost over last 5 months using Eloquent
-        $months = collect(range(0, 4))->map(function ($i) {
-            return Carbon::now()->subMonths($i)->startOfMonth();
-        })->reverse();
-    
+
+        // Application status breakdown
+        $statuses = ['pending', 'under_committee_review', 'committee_approved', 'committee_rejected', 'final_approved', 'final_rejected'];
+        $applicationStatusData = [];
+        foreach ($statuses as $status) {
+            $applicationStatusData[$status] = MaintenanceRequest::where('status', $status)->count();
+        }
+
+        // Last 5 months (labels and cost data)
+        $months = collect(range(0, 4))->map(fn($i) => now()->subMonths($i)->startOfMonth())->reverse();
+
         $labels = $months->map(fn($date) => $date->format('M'))->toArray();
-    
+
         $costData = $months->map(function ($monthStart) {
-            return VehicleMaintenance::whereBetween('created_at', [
-                $monthStart,
-                $monthStart->copy()->endOfMonth()
-            ])->sum('actual_cost');
+            $start = $monthStart->copy();
+            $end = $monthStart->copy()->endOfMonth();
+
+            return VehicleMaintenance::whereBetween('created_at', [$start, $end])
+                ->sum('actual_cost');
         })->toArray();
-    
+
         return view('dashboard.dashboard', compact(
             'totalApplications',
             'totalVehicles',
@@ -74,5 +73,5 @@ class DashboardController extends Controller
             'costData'
         ));
     }
-    
+
 }

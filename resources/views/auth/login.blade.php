@@ -41,7 +41,7 @@
                 <div class="relative">
                     <input type="password" name="password" placeholder="Password" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-md placeholder:text-gray-300  focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePasswordVisibility()">
                         <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -60,6 +60,16 @@
         </div>
     </div>
 
+<script>
+    function togglePasswordVisibility() {
+        var x = document.querySelector("input[name='password']");
+        if (x.type === "password") {
+            x.type = "text";
+        } else {
+            x.type = "password";
+        }
+    }
+</script>
 </body>
 
 </html>

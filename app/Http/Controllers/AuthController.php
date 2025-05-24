@@ -11,7 +11,7 @@ use App\Models\UserRole;
 
 class AuthController extends Controller
 {
-    // Show login form (Web)
+        // Show login form (Web)
     public function showLoginForm()
     {
         return view('auth.login');

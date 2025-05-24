@@ -3,7 +3,7 @@
 @section('content')
 
     <div class="w-full min-h-screen grid place-items-center">
-        <div class="w-[80%] h-full sm:h-[85vh] grid place-items-center rounded-lg bg-white backdrop:bg-gray/50">
+        <div class="w-full h-full grid place-items-center rounded-lg bg-white">
             <div>
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-3xl font-bold">Vehicle Information</h1>
@@ -13,11 +13,16 @@
                 </div>
                 {{-- vehicle info boxes --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    @foreach($locations as $vehicle)
-                        <button onclick="showLiveLocationModal({{ $vehicle->latitude }}, {{ $vehicle->longitude }}, {{ $vehicle->speed }})"
+                    @foreach($vehicles->take(6) as $vehicle)
+                        <button
+                            onclick="showLiveLocationModal({{ $vehicle->latestLocation->latitude }}, {{ $vehicle->latestLocation->longitude }}, {{ $vehicle->latestLocation->speed }})"
                             class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
-                            <img src="{{ asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
-                            <span class="text-md  ">ID: {{ $vehicle->vehicle_id }}</span>
+                            @if ($vehicle->Vehicle_Type === 'Mobile_lab')
+                            <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                            @else
+                            <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
+                            @endif
+                            <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
                         </button>
                     @endforeach
                 </div>
@@ -25,12 +30,11 @@
         </div>
     </div>
 
-    <dialog id="my_modal_3" class="modal relative">
+    <dialog id="my_modal_3" class="modal fixed top-0 hidden">
         <!-- Close Button Outside Modal Box -->
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost bg-green-800 absolute right-2 top-2 z-50">✕</button>
+            <button class="btn btn-sm btn-circle btn-ghost bg-green-800 text-white absolute right-2 top-2 z-50">✕</button>
         </form>
-
         <div class="modal-box" style="width: 800px; height: 550px; max-width: none;">
             <!-- Map Section -->
             <div id="map" class="w-full rounded" style="height: 350px;"></div>
@@ -59,7 +63,6 @@
 
     <!-- Google Maps API Script (replace YOUR_API_KEY) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATGxyJb74dBUuIy5ibEOUdqJgcfU71jQI"></script>
-
     <script>
         let map;
         let marker;
@@ -87,7 +90,10 @@
             initMap(lat, lng);
             // Show modal
             const modal = document.getElementById("my_modal_3");
-            if (modal.showModal) modal.showModal();
+            modal.classList.remove('hidden');
+            if (modal.showModal) {
+                modal.showModal();
+            };
         }
         const modal = document.getElementById('my_modal_3');
         modal.addEventListener('click', function (event) {
@@ -100,13 +106,8 @@
             );
             if (!isInDialog) {
                 modal.close(); // Close modal on outside click
+                modal.classList.add('hidden');
             }
         });
-
     </script>
-
-
-
-
-
 @endsection

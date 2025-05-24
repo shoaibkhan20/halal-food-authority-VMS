@@ -4,10 +4,12 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Faker\Factory as Faker;
-
+use App\Models\VehicleType; // Ensure this is correctly imported
+use App\Models\MaintenanceRequest;
+use App\Models\User;
+use App\Models\Vehicle;
 class VmsSeeder extends Seeder
 {
     public function run(): void
@@ -25,6 +27,7 @@ class VmsSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
+
         // 2. Users (using existing role_ids)
         $roleIds = DB::table('user_roles')->pluck('id')->toArray();
         $users = [];
@@ -33,7 +36,7 @@ class VmsSeeder extends Seeder
                 'name' => $faker->name,
                 'contact' => $faker->phoneNumber,
                 'username' => 'user' . $i . '_' . Str::random(3),
-                'password' => 'password123',
+                'password' => 'password123', // Replace this with a hashed password if needed
                 'branch_id' => $faker->randomElement($branches),
                 'role_id' => $faker->randomElement($roleIds),
                 'remember_token' => Str::random(10),
@@ -43,6 +46,12 @@ class VmsSeeder extends Seeder
         }
 
         // 3. Vehicles
+        // Fetch all vehicle type names from the vehicle_types table
+        $vehicleTypeNames = VehicleType::pluck('name')->toArray(); // Array of vehicle type names
+
+        // Fetch all branch IDs directly from the previously created branch data
+        $branchIds = $branches;
+
         $vehicleIds = [];
         for ($i = 1; $i <= 10; $i++) {
             $regId = 'REG' . strtoupper(Str::random(5));
@@ -51,9 +60,8 @@ class VmsSeeder extends Seeder
                 'RegID' => $regId,
                 'Model' => $faker->randomElement(['Toyota Corolla', 'Suzuki Mehran', 'Honda Civic', 'Kia Sportage']),
                 'Fuel_type' => $faker->randomElement(['Petrol', 'Diesel']),
-                'Vehicle_Type' => $faker->randomElement(['Sedan', 'SUV', 'Truck', 'Van']),
-                'Region' => $faker->state,
-                'branch_id' => $faker->randomElement($branches),
+                'Vehicle_Type' => $faker->randomElement($vehicleTypeNames), // Random vehicle type from the database
+                'branch_id' => $faker->randomElement($branchIds),
                 'Average_mileage' => $faker->randomFloat(2, 8, 20),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -102,21 +110,66 @@ class VmsSeeder extends Seeder
         }
 
         // 7. Maintenance Requests
+
+
+        // Use the Eloquent model for insert
         $maintenanceIds = [];
+
         for ($i = 1; $i <= 5; $i++) {
-            $maintenanceIds[] = DB::table('maintenance_requests')->insertGetId([
-                'vehicle_id' => $faker->randomElement($vehicleIds),
-                'applied_by' => $faker->randomElement($users),
-                'reviewed_by' => $faker->randomElement($users),
-                'approved_by' => $faker->randomElement($users),
-                'rejected_by' => null,
-                'issue' => $faker->word,
-                'status' => $faker->randomElement(['pending', 'approved']),
+            $appliedBy = $faker->randomElement($users);
+            $vehicleId = $faker->randomElement($vehicleIds);
+
+            // Director decision
+            $directorStatus = $faker->randomElement(['approved', 'rejected', 'pending']);
+            $directorReviewedBy = $directorStatus !== 'pending' ? $faker->randomElement($users) : null;
+            $directorRejectionMessage = $directorStatus === 'rejected' ? $faker->sentence : null;
+
+            // Committee status only matters if director rejected
+            $committeeStatus = 'pending';
+            $committeeReviewedBy = null;
+            $committeeRejectionMessage = null;
+
+            if ($directorStatus === 'rejected') {
+                $committeeStatus = $faker->randomElement(['approved', 'rejected', 'pending']);
+                $committeeReviewedBy = $committeeStatus !== 'pending' ? $faker->randomElement($users) : null;
+                $committeeRejectionMessage = $committeeStatus === 'rejected' ? $faker->sentence : null;
+            }
+
+            // Final approval only if committee approved
+            $directorFinalStatus = 'pending';
+            $directorFinalApprovedBy = null;
+            $directorFinalRejectionMessage = null;
+
+            if ($committeeStatus === 'approved') {
+                $directorFinalStatus = $faker->randomElement(['approved', 'rejected', 'pending']);
+                $directorFinalApprovedBy = $directorFinalStatus !== 'pending' ? $faker->randomElement($users) : null;
+                $directorFinalRejectionMessage = $directorFinalStatus === 'rejected' ? $faker->sentence : null;
+            }
+
+            // Create record
+            $maintenanceRequest = MaintenanceRequest::create([
+                'vehicle_id' => $vehicleId,
+                'applied_by' => $appliedBy,
+                'issue' => $faker->words(3, true),
                 'estimated_cost' => $faker->randomFloat(2, 5000, 30000),
-                'created_at' => now(),
-                'updated_at' => now(),
+
+                'director_status' => $directorStatus,
+                'director_reviewed_by' => $directorReviewedBy,
+                'director_rejection_message' => $directorRejectionMessage,
+
+                'committee_status' => $committeeStatus,
+                'committee_reviewed_by' => $committeeReviewedBy,
+                'committee_rejection_message' => $committeeRejectionMessage,
+
+                'director_final_status' => $directorFinalStatus,
+                'director_final_approved_by' => $directorFinalApprovedBy,
+                'director_final_rejection_message' => $directorFinalRejectionMessage,
             ]);
+
+            $maintenanceIds[] = $maintenanceRequest->id;
         }
+
+
 
         // 8. Supervisor Reports
         foreach ($maintenanceIds as $mid) {
@@ -140,6 +193,7 @@ class VmsSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
+
         // 10. Vehicle Maintenance (NEW BLOCK)
         foreach ($maintenanceIds as $mid) {
             DB::table('vehicle_maintenance')->insert([
@@ -155,6 +209,5 @@ class VmsSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
-
     }
 }

@@ -11,6 +11,13 @@ class VehicleAssignment extends Model
         parent::booted();
         static::observe(\App\Observers\VehicleAssignmentObserver::class);
     }
+    protected $fillable = [
+        'vehicle_id',
+        'user_id',
+        'assigned_date',
+        'returned_date',
+    ];
+
 
     public function vehicle()
     {
@@ -19,6 +26,6 @@ class VehicleAssignment extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

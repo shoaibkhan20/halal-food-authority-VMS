@@ -2,7 +2,7 @@
 @section('content')
 
     <div class="w-full min-h-screen grid place-items-center">
-        <div class="w-[80%] h-full sm:h-[85vh] overflow-y-auto rounded-lg bg-white backdrop:bg-gray/50">
+        <div class="w-full h-full rounded-lg bg-white backdrop:bg-gray/50">
             <div class="flex flex-col w-full p-8">
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-3xl font-bold">Vehicle Status Report</h1>

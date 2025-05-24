@@ -10,23 +10,22 @@ class ReportController extends Controller
     //
     public function index()
     {
-        $vehicles = \DB::table('vehicles')
-            ->leftJoin('vehicle_assignments', function ($join) {
-                $join->on('vehicles.RegID', '=', 'vehicle_assignments.vehicle_id')
-                    ->whereNull('vehicle_assignments.returned_date');
-            })
-            ->leftJoin('users', 'vehicle_assignments.user_id', '=', 'users.id')
-            ->select(
-                'vehicles.RegID',
-                'vehicles.Model',
-                'users.name as AssignedTo',
-                'vehicles.status',
-                'vehicles.Region'
-            )
-            ->get();
+        $vehicles = Vehicle::with(['currentAssignment.user', 'branch'])
+            ->get()
+            ->map(function ($vehicle) {
+                return [
+                    'RegID' => $vehicle->RegID,
+                    'Model' => $vehicle->Model,
+                    'AssignedTo' => $vehicle->latestAssignment->user->name ?? 'Unassigned',
+                    'Status' => $vehicle->status,
+                    'Location' => $vehicle->branch->location ?? 'Unknown',
+                ];
+            });
 
-        return view("dashboard.shared.reportings", compact("vehicles"));
+        return view('dashboard.shared.reportings', compact('vehicles'));
     }
+
+
 
     public function vehicleStatus()
     {
@@ -44,7 +43,7 @@ class ReportController extends Controller
                 'Model' => $vehicle->Model,
                 'AssignedTo' => optional($vehicle->assignments->first()->user ?? null)->name,
                 'status' => $vehicle->status,
-                'Region' => $vehicle->Region,
+                'Region' => $vehicle->branch->location,
                 'under_maintenance' => $vehicle->maintenanceRecords->isNotEmpty(),
             ];
         });

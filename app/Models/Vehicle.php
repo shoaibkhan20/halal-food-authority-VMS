@@ -11,19 +11,45 @@ class Vehicle extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+    protected $fillable = [
+        'RegID',
+        'Model',
+        'Fuel_type',
+        'Vehicle_Type',
+        'Average_mileage',
+        'status',
+        'branch_id',
+    ];
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
-
+    // Optional: cleaner access to location
+    public function getLocationAttribute()
+    {
+        return $this->branch->location ?? 'Unknown';
+    }
+    public function currentAssignment()
+    {
+        return $this->hasOne(VehicleAssignment::class, 'vehicle_id', 'RegID')
+            ->whereNull('returned_date');
+    }
     public function assignments()
     {
         return $this->hasMany(VehicleAssignment::class, 'vehicle_id');
+    }
+    public function latestAssignment()
+    {
+        return $this->hasOne(VehicleAssignment::class, 'vehicle_id')->latestOfMany();
     }
 
     public function locations()
     {
         return $this->hasMany(Location::class, 'vehicle_id');
+    }
+    public function latestLocation()
+    {
+        return $this->hasOne(Location::class, 'vehicle_id')->latestOfMany();
     }
 
     public function fuelRequests()

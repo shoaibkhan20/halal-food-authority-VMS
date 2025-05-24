@@ -6,7 +6,64 @@ use Illuminate\Database\Eloquent\Model;
 
 class MaintenanceRequest extends Model
 {
-    //
+    protected $fillable = [
+        'vehicle_id',
+        'applied_by',
+        'issue',
+        'estimated_cost',
+        'status',
+
+        'director_status',
+        'director_reviewed_by',
+        'director_rejection_message',
+
+        'committee_status',
+        'committee_reviewed_by',
+        'committee_rejection_message',
+
+        'director_final_status',
+        'director_final_approved_by',
+        'director_final_rejection_message',
+    ];
+
+    protected static function booted()
+    {
+        static::saving(function ($request) {
+
+            // ✅ Final decision overrides all
+            if ($request->director_final_status === 'approved') {
+                $request->status = 'final_approved';
+            } elseif ($request->director_final_status === 'rejected') {
+                $request->status = 'final_rejected';
+            }
+
+            // ✅ If director approved and no final stage — mark as final
+            elseif ($request->director_status === 'approved') {
+                $request->status = 'final_approved';
+            }
+
+            // ✅ If director rejected, move to committee review
+            elseif ($request->director_status === 'rejected') {
+                // Only then allow committee to change status
+                if ($request->committee_status === 'approved') {
+                    $request->status = 'committee_approved';
+                } elseif ($request->committee_status === 'rejected') {
+                    $request->status = 'committee_rejected';
+                } else {
+                    $request->status = 'under_committee_review';
+                }
+            }
+
+            // ✅ Default fallback
+            else {
+                $request->status = 'pending';
+            }
+        });
+    }
+
+
+
+    // Relationships
     public function vehicle()
     {
         return $this->belongsTo(Vehicle::class, 'vehicle_id', 'RegID');
@@ -17,28 +74,29 @@ class MaintenanceRequest extends Model
         return $this->belongsTo(User::class, 'applied_by');
     }
 
-    public function reviewedBy()
+    public function directorReviewer()
     {
-        return $this->belongsTo(User::class, 'reviewed_by');
+        return $this->belongsTo(User::class, 'director_reviewed_by');
     }
 
-    public function approvedBy()
+
+    public function committeeReviewer()
     {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'committee_reviewed_by');
     }
 
-    public function rejectedBy()
+    public function finalDirectorApprover()
     {
-        return $this->belongsTo(User::class, 'rejected_by');
+        return $this->belongsTo(User::class, 'director_final_approved_by');
     }
 
     public function supervisorReports()
     {
         return $this->hasMany(VehicleSupervisorReport::class);
     }
+
     public function maintenance()
     {
         return $this->hasMany(VehicleMaintenance::class);
     }
-
 }

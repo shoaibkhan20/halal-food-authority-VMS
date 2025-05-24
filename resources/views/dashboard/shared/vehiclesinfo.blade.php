@@ -4,15 +4,22 @@
 @section('content')
 
     <div class="w-full min-h-screen grid place-items-center">
-        <div class="w-[80%] h-full sm:h-[85vh] grid place-items-center rounded-lg bg-white">
+        <div class="w-full h-full grid place-items-center rounded-lg bg-white">
             <div>
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-3xl font-bold">Vehicle Information</h1>
                     @if(Auth::user()->role->role_name === 'super-admin')
-                        <button onclick="my_modal_3.showModal()"
-                            class="cursor-pointer bg-green-800 text-white px-4 py-2 rounded">
-                            AddVehicle
-                        </button>
+                        <div>
+                            <button onclick="assign_modal.showModal()"
+                                class="border cursor-pointer bg-white text-black px-4 py-2 rounded">
+                                Assign Vehicle
+                            </button>
+
+                            <button onclick="my_modal_3.showModal()"
+                                class="cursor-pointer bg-green-800 text-white px-4 py-2 rounded">
+                                Add New Vehicle
+                            </button>
+                        </div>
                     @endif
                 </div>
                 <div class="mb-6">
@@ -23,7 +30,11 @@
                     @foreach($regIds as $vehicle)
                         <div onclick="window.location='{{ route('vehicle.details', ['regid' => $vehicle->RegID]) }}'"
                             class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
-                            <img src="{{ asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                            @if ($vehicle->Vehicle_Type === 'Mobile_lab')
+                            <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                            @else
+                            <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
+                            @endif
                             <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
                         </div>
                     @endforeach
@@ -41,52 +52,51 @@
 
             <h3 class="text-2xl font-semibold mb-4 text-center">Add New Vehicle</h3>
 
-            <form method="POST" class="space-y-4">
+            <form method="POST" action="{{ route('vehicles.store') }}" class="space-y-4">
                 @csrf
-
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Registration ID</label>
                         <input name="RegID" required type="text" class="input input-bordered w-full" />
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium mb-1">Model</label>
                         <input name="Model" required type="text" class="input input-bordered w-full" />
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium mb-1">Fuel Type</label>
                         <select name="Fuel_type" required class="select select-bordered w-full">
                             <option value="">Select</option>
                             <option>Petrol</option>
                             <option>Diesel</option>
+                            <option>CNG Gas</option>
                             <option>Electric</option>
                             <option>Hybrid</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium mb-1">Vehicle Type</label>
-                        <input name="Vehicle_Type" required type="text" class="input input-bordered w-full" />
+                        <select name="Vehicle_Type" class="select select-bordered w-full">
+                            <option value="" hidden>Select Type</option>
+                            @foreach($vehicleTypes as $type)
+                                <option value="{{ $type->name }}">{{ $type->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
-
                     <div>
-                        <label class="block text-sm font-medium mb-1">Region</label>
-                        <input name="Region" required type="text" class="input input-bordered w-full" />
+                        <label class="block text-sm font-medium mb-1">Branch</label>
+                        <select name="branch_id" class="select select-bordered w-full">
+                            <option value="" hidden>Select Branch</option>
+                            @foreach($branches as $branch)
+                                <option value="{{ $branch->id }}">{{ $branch->name }} ({{ $branch->location }})</option>
+                            @endforeach
+                        </select>
                     </div>
-
                     <div>
-                        <label class="block text-sm font-medium mb-1">Branch ID</label>
-                        <input name="branch_id" type="number" class="input input-bordered w-full" />
-                    </div>
-
-                    <div class="col-span-2">
-                        <label class="block text-sm font-medium mb-1">Average Mileage</label>
+                        <label class="block text-sm font-medium mb-1">Average Mileage (km/l)</label>
                         <input name="Average_mileage" type="number" step="0.01" class="input input-bordered w-full" />
                     </div>
                 </div>
-
                 <div class="text-right pt-4">
                     <button type="submit" class="btn bg-green-800 text-white">Add Vehicle</button>
                 </div>
@@ -94,40 +104,107 @@
         </div>
     </dialog>
 
+    <dialog id="assign_modal" class="modal">
+    <div class="modal-box max-w-2xl">
+        <!-- Close Button -->
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
 
-    {{-- <button class="btn" onclick="my_modal_3.showModal()">open modal</button>
-    <dialog id="my_modal_3" class="modal">
-        <div class="modal-box">
-            <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <h2 class="text-xl font-bold mb-4">Vehicle Details</h2>
-            <ul class="text-gray-700 space-y-2 text-sm">
-                <li><strong>Registration ID:</strong> <span id="regId"></span></li>
-                <li><strong>Model:</strong> <span id="model"></span></li>
-                <li><strong>Fuel Type:</strong> <span id="fuel"></span></li>
-                <li><strong>Vehicle Type:</strong> <span id="type"></span></li>
-                <li><strong>Region:</strong> <span id="region"></span></li>
-                <li><strong>Average Mileage:</strong> <span id="mileage"></span></li>
-            </ul>
-        </div>
-    </dialog>
+        <h3 class="text-2xl font-semibold mb-4 text-center">Assign Vehicle to User</h3>
 
-    {{-- Script to handle modal --}}
+        <form method="POST" action="{{ route('vehicle.assign') }}" class="space-y-6">
+            @csrf
 
-    {{--
-    <script>
-        function openVehicleModal(vehicle) {
-            const modal = document.getElementById('my_modal_3');
-            document.getElementById('regId').textContent = vehicle.reg_id;
-            document.getElementById('model').textContent = vehicle.model;
-            document.getElementById('fuel').textContent = vehicle.fuel;
-            document.getElementById('type').textContent = vehicle.type;
-            document.getElementById('region').textContent = vehicle.region;
-            document.getElementById('mileage').textContent = vehicle.mileage;
-            modal.showModal();
-        }
-    </script> --}}
+            <!-- Vehicle Searchable Dropdown -->
+            <div class="relative">
+                <label class="block text-sm font-medium mb-1">Vehicle (RegID)</label>
+                <input
+                    id="vehicleInput"
+                    name="vehicle_id"
+                    type="text"
+                    required
+                    autocomplete="off"
+                    placeholder="Search vehicle..."
+                    class="input input-bordered w-full"
+                    oninput="filterDropdown(this, 'vehicleList')"
+                >
+                <ul id="vehicleList" class="z-10 w-full absolute dropdown-list hidden bg-white border border-gray-200 mt-1 rounded shadow-md max-h-40 overflow-y-auto">
+                    @foreach($availableVehicles as $vehicle)
+                        <li class="dropdown-item px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onclick="selectDropdown('vehicleInput', '{{ $vehicle->RegID }}')">
+                            {{ $vehicle->RegID }} - {{ $vehicle->Model }}
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <!-- User Searchable Dropdown -->
+            <div class="relative ">
+                <label class="block text-sm font-medium mb-1">Assign To (User ID)</label>
+                <input
+                    id="userInput"
+                    name="user_id"
+                    type="text"
+                    required
+                    autocomplete="off"
+                    placeholder="Search user..."
+                    class="input input-bordered w-full"
+                    oninput="filterDropdown(this, 'userList')"
+                >
+                <ul id="userList" class="w-full dropdown-list hidden bg-white border border-gray-200 mt-1 rounded shadow-md max-h-40 overflow-y-auto">
+                    @foreach($users as $user)
+                        <li class="dropdown-item px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onclick="selectDropdown('userInput', '{{ $user->id }}')">
+                            {{ $user->id }} - {{ $user->name }}
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="text-right pt-2">
+                <button type="submit" class="btn bg-green-800 text-white">Assign</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Tailwind-friendly minimal JS -->
+<script>
+    function filterDropdown(input, listId) {
+        const filter = input.value.toLowerCase();
+        const dropdown = document.getElementById(listId);
+        const items = dropdown.querySelectorAll('li');
+
+        let hasVisible = false;
+        items.forEach(item => {
+            const match = item.textContent.toLowerCase().includes(filter);
+            item.style.display = match ? 'block' : 'none';
+            if (match) hasVisible = true;
+        });
+
+        dropdown.classList.toggle('hidden', !hasVisible);
+    }
+
+    function selectDropdown(inputId, value) {
+        const input = document.getElementById(inputId);
+        input.value = value;
+        const dropdown = input.nextElementSibling;
+        dropdown.classList.add('hidden');
+    }
+
+    // Close dropdown if clicked outside
+    document.addEventListener('click', function (event) {
+        const dropdowns = document.querySelectorAll('.dropdown-list');
+        dropdowns.forEach(dropdown => {
+            if (!dropdown.previousElementSibling.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    });
+</script>
+
+
 
 
 @endsection

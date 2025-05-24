@@ -1,7 +1,7 @@
 @props(['headers' => [], 'rows' => []])
 
 <div class="overflow-x-auto">
-    <table class="table min-w-full text-center text-sm">
+    <table class="table min-w-full text-left text-sm">
         <thead class="bg-gray-200">
             <tr>
                 @foreach ($headers as $header)
