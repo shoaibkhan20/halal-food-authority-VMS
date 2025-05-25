@@ -19,6 +19,7 @@ class UserAndRoleSeeder extends Seeder
             'district-user',
             'committe-user',
             'individual-driver',
+            'vehicle-supervisor'
         ];
         
         foreach ($roles as $roleName) {
@@ -37,3 +38,4 @@ class UserAndRoleSeeder extends Seeder
         );
     }
 }
+

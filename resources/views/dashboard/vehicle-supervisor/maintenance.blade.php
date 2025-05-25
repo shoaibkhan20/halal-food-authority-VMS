@@ -11,18 +11,18 @@
 
                 <div class="flex justify-between">
                     <div class="mb-6 relative w-full max-w-xs">
-                        <form action="{{ route('vehicle.maintenance') }}" method="GET">
+                        <form action="{{ route('vehicle-supervisor.maintenance') }}" method="GET">
                             <input 
                                 type="text" 
                                 id="filterSearch" 
                                 name="search" 
                                 placeholder="Search Reg.id" 
-                                class="border border-gray-300 rounded px-4 py-2 w-full pr-8" 
+                                class="border border-gray-300 rounded px-4 py-1 w-full pr-8" 
                                 value="{{ request('search') }}"
                             >
 
                             @if(request('search'))
-                            <a href="{{ route('vehicle.maintenance') }}" 
+                            <a href="{{ route('vehicle-supervisor.maintenance') }}" 
                             class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                             aria-label="Clear search"
                             >
@@ -34,7 +34,7 @@
 
 
                     <div class="mb-6">
-                        <select class="border border-gray-300 rounded px-4 py-2">
+                        <select class="border border-gray-300 rounded px-4 py-1">
                             <option>Last Month</option>
                             <option>Last 3 Months</option>
                             <option>All Time</option>
@@ -58,16 +58,14 @@
                         @endif
 
                         @php
-                            $headers = ['Reg ID', 'Issue', 'Estimated Cost', 'Applied By', 'Status', 'Region', 'Actions'];
+                            $headers = ['Reg ID', 'Issue', 'Estimated Cost', 'Applied By', 'Region', 'Actions'];
 
                             $rows = $pendingRequests
-                                ->filter(fn($r) => in_array($r->status, ['pending', 'committee_approved'])) // 🔥 Status filter here
                                 ->map(function ($record) {
                                     $regId = $record->vehicle->RegID ?? 'N/A';
                                     $issue = $record->issue;
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
-                                    $status = ucfirst($record->status);
                                     $region = $record->vehicle->branch->location ?? 'N/A';
 
                                     $userRole = Auth::user()?->role?->role_name;
@@ -75,97 +73,64 @@
                                     $rejectRoute = route('maintenance.reject', ['id' => $record->id]);
                                     $actions = '';
 
-                                    if (in_array($userRole, ['director-admin'])) {
+                                    if ($userRole === "vehicle-supervisor") {
                                         $actions .= '<div class="flex gap-2">';
                                         $actions .= '
-                                                                                                        <form method="POST" action="' . $approveRoute . '">
-                                                                                                            ' . csrf_field() . '
-                                                                                                            <button type="submit" class="btn btn-sm bg-green-800 text-white">Approve</button>
-                                                                                                        </form>
-                                                                                                    ';
-
+                                            <form method="POST" action="' . $approveRoute . '">
+                                                ' . csrf_field() . '
+                                                <button type="submit" class="btn btn-sm bg-green-800 text-white">Accept</button>
+                                            </form>
+                                ';
                                         // Modal trigger for rejection
                                         // Modal trigger for rejection
                                         $actions .= '
-                                                                                                <label for="reject-modal-' . $record->id . '" class="btn btn-sm bg-red-800 text-white hover:bg-red-700 transition">Reject</label>
-                                                                                            </div>';
-
-                                        // Modal content
-                                        $actions .= '
-                                                <input type="checkbox" id="reject-modal-' . $record->id . '" class="modal-toggle" />
-                                                <div class="modal">
-                                                    <div class="modal-box w-full max-w-lg">
-                                                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Reject Maintenance Request</h3>
-                                                        <form method="POST" action="' . $rejectRoute . '" class="space-y-4">
-                                                            ' . csrf_field() . '
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Rejection Message</label>
-                                                                <textarea name="rejection_message" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent" rows="4" placeholder="Reason for rejection..."></textarea>
-                                                            </div>
-                                                            <div class="flex justify-end gap-2 mt-6">
-                                                                <button type="submit" class="btn bg-red-800 text-white hover:bg-red-700 transition">Submit</button>
-                                                                <label for="reject-modal-' . $record->id . '" class="btn btn-outline">Cancel</label>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            ';
-
+                                            <form method="POST" action="' . $approveRoute . '">
+                                                ' . csrf_field() . '
+                                                <button type="submit" class="btn btn-sm bg-red-800 text-white">Cancel</button>
+                                            </form>
+                                        </div>';
                                     } else {
                                         $actions .= '<button class="btn btn-sm bg-gray-500 text-white" disabled>No Access</button>';
                                     }
 
-                                    return [$regId, $issue, $cost, $appliedBy, $status, $region, $actions];
+                                    return [$regId, $issue, $cost, $appliedBy, $region, $actions];
                                 })->toArray();
                         @endphp
                         <x-table :headers="$headers" :rows="$rows" />
                     </div>
-
                     {{--
                     <pre>
-                                {{ $pendingRequests }}
-                            </pre> --}}
-                    <input type="radio" name="my_tabs_3" class="tab" aria-label="Under Committee Review" />
+                        {{ $pendingRequests }}
+                    </pre> --}}
+                
+                    <input type="radio" name="my_tabs_3" class="tab" aria-label="UnderMaintenance Vehicles" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
+                        {{-- Maintenance History Table --}}
                         @php
-                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region', 'Reason'];
-                            $rows = $pendingRequests
-                                ->filter(fn($r) => in_array($r->status, ['under_committee_review'])) // 🔥 Status filter here
-                                ->map(function ($record) {
-                                    $regId = $record->vehicle->RegID ?? 'N/A';
-                                    $issue = $record->issue;
-                                    $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
-                                    $appliedBy = $record->appliedBy->name ?? 'N/A';
-                                    $region = $record->vehicle->branch->location ?? 'N/A';
-                                    $rejectionReason = $record->director_rejection_message;
-                                    $userRole = Auth::user()?->role?->role_name;
-
-                                    return [$regId, $issue, $cost, $appliedBy, $region, $rejectionReason];
-                                })->toArray();
+                            $headers = ['Reg ID', 'Date', 'Cost', 'Location', 'Status', 'Actions'];
+                            $rows =
+                                $maintenanceHistory->filter(fn($r) => in_array($r->status, ['in_progress']))
+                                    ->map(function ($record) {
+                                        $regId = $record->vehicle_id;
+                                        $date = $record->started_at ?? 'N/A';
+                                        $cost = $record->actual_cost ? '$' . number_format($record->actual_cost, 2) : 'N/A';
+                                        // $items = $record->maintenance_notes ?? '—';
+                                        $location = $record->vehicle->branch->location ?? 'N/A';
+                                        $status = ucfirst($record->status);
+                                        $actions = '
+                                            <form method="POST" >
+                                                ' . csrf_field() . '
+                                                <button type="submit" class="w-full btn btn-sm bg-green-800 text-white">Report</button>
+                                            </form>
+                                        ';
+                                        if ($record->status === 'completed') {
+                                            $actions = '<label for="modal-' . $record->id . '" class="btn btn-sm bg-green-800 text-white">Bill</label>';
+                                        }
+                                        return [$regId, $date, $cost, $location, $status, $actions];
+                                    })->toArray();
                         @endphp
-
                         <x-table :headers="$headers" :rows="$rows" />
                     </div>
-                    <input type="radio" name="my_tabs_3" class="tab" aria-label="Requests History" />
-                    <div class="tab-content bg-base-100 border-base-300 p-6">
-                        @php
-                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region', 'Status'];
-                            $rows = $pendingRequests
-                                ->filter(fn($r) => in_array($r->status, ['committee_approved', 'committee_rejected', 'final_approved', 'final_rejected'])) // 🔥 Status filter here
-                                ->map(function ($record) {
-                                    $regId = $record->vehicle->RegID ?? 'N/A';
-                                    $issue = $record->issue;
-                                    $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
-                                    $appliedBy = $record->appliedBy->name ?? 'N/A';
-                                    $region = $record->vehicle->branch->location ?? 'N/A';
-                                    $rejectionReason = $record->status;
-                                    return [$regId, $issue, $cost, $appliedBy, $region, $rejectionReason];
-                                })->toArray();
-                        @endphp
-
-                        <x-table :headers="$headers" :rows="$rows" />
-                    </div>
-
 
                     <input type="radio" name="my_tabs_3" class="tab" aria-label="Maintenance History" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
@@ -173,7 +138,7 @@
                         @php
                             $headers = ['Reg ID', 'Date', 'Cost', 'Items', 'Location', 'Status', 'Actions'];
                             $rows =
-                                $maintenanceHistory->filter(fn($r) => in_array($r->status, ['completed', 'in_progress']))
+                                $maintenanceHistory->filter(fn($r) => in_array($r->status, ['completed', 'cancelled']))
                                     ->map(function ($record) {
                                         $regId = $record->vehicle_id;
                                         $date = $record->started_at ?? 'N/A';

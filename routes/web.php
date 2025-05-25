@@ -16,11 +16,11 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
-
 // ====================
 // Authenticated Routes
 // ====================
 Route::middleware('auth')->group(function () {
+
     // 🏠 Role Redirecting Dashboard Controller
     Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/home', [DashboardController::class, 'index']);
@@ -28,10 +28,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
     //shared routes
-    Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
+    Route::middleware('role:vehicle-supervisor,super-admin,director-admin,committe-user')->group(function(){
         Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
         Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
         Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
+    });
+    Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
         Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('vehicle.maintenance');
         Route::get('/reporting', [ReportController::class, 'index'])->name('reports');
@@ -43,6 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/maintenance/approve/{id}', [MaintenanceController::class, 'approve'])->name('maintenance.approve');
         Route::post('/maintenance/reject/{id}', [MaintenanceController::class, 'reject'])->name('maintenance.reject');
     });
+
     // Super Admin
     Route::prefix('super-admin')->middleware('role:super-admin')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('super-admin.dashboard');
@@ -61,6 +64,11 @@ Route::middleware('auth')->group(function () {
     //  Committe User
     Route::prefix('committe-user')->middleware('role:committe-user')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('committe-user.dashboard');
+    });
+    // vehicle supervisor
+    Route::prefix('vehicle-supervisor')->middleware('role:vehicle-supervisor')->group(function () {
+        Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('vehicle-supervisor.dashboard');
+        Route::get('/maintenance', [MaintenanceController::class, 'vehicleMaintenance'])->name('vehicle-supervisor.maintenance');
     });
     //  Divisional User
     Route::prefix('divisional-user')->middleware('role:divisional-user')->group(function () {

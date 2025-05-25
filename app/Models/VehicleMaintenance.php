@@ -8,6 +8,9 @@ class VehicleMaintenance extends Model
 {
     protected $table = 'vehicle_maintenance';
 
+    protected $casts = [
+        'completed_at' => 'datetime',
+    ];
     protected $fillable = [
         'vehicle_id',
         'maintenance_request_id',

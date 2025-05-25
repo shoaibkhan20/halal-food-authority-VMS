@@ -140,8 +140,8 @@ class VehicleController extends Controller
 
         // Fetch the filtered vehicles
         $vehicles = $query->get();
-        // Return the filtered results to the view
-        return view('dashboard.shared.vehicle-tracking', compact('vehicles','emptySearch'));
+        // Return the filtered results to the vie
+        return view('dashboard.shared.vehicle-tracking', compact('vehicles'));
     }
 
 

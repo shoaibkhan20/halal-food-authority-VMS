@@ -94,20 +94,18 @@
                     <input type="radio" name="my_tabs_3" class="tab" aria-label="History" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         @php
-                            $headers = ['Reg ID', 'Date', 'Cost', 'Items', 'Location', 'Status', 'Actions'];
-                            $rows = $maintenanceHistory->map(function ($record) {
-                                $regId = $record->vehicle_id;
-                                $date = $record->started_at ?? 'N/A';
-                                $cost = $record->actual_cost ? '$' . number_format($record->actual_cost, 2) : 'N/A';
-                                $items = $record->maintenance_notes ?? '—';
-                                $location = $record->vehicle->branch->location ?? 'N/A';
-                                $status = ucfirst($record->status);
-                                $actions = '';
-                                if ($record->status === 'completed') {
-                                    $actions = '<label for="modal-' . $record->id . '" class="btn btn-sm bg-green-800 text-white">Bill</label>';
-                                }
-                                return [$regId, $date, $cost, $items, $location, $status, $actions];
-                            })->toArray();
+                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region', 'Status'];
+                            $rows = $pendingRequests
+                                ->filter(fn($r) => in_array($r->status, ['committee_approved', 'committee_rejected', 'final_approved', 'final_rejected'])) // 🔥 Status filter here
+                                ->map(function ($record) {
+                                    $regId = $record->vehicle->RegID ?? 'N/A';
+                                    $issue = $record->issue;
+                                    $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
+                                    $appliedBy = $record->appliedBy->name ?? 'N/A';
+                                    $region = $record->vehicle->branch->location ?? 'N/A';
+                                    $rejectionReason = $record->status;
+                                    return [$regId, $issue, $cost, $appliedBy, $region, $rejectionReason];
+                                })->toArray();
                         @endphp
 
                         <x-table :headers="$headers" :rows="$rows" />

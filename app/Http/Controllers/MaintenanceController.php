@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\VehicleMaintenance;
 use App\Models\MaintenanceRequest;
@@ -9,11 +8,24 @@ use Illuminate\Support\Facades\Auth;
 
 class MaintenanceController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
-        $maintenanceHistory = VehicleMaintenance::with('vehicle', 'performed_by_user')->get();
-        // Show all requests that are not finally approved/rejected
-        $pendingRequests = MaintenanceRequest::with('vehicle', 'appliedBy', 'directorReviewer', 'committeeReviewer', 'finalDirectorApprover')
+        $search = $request->query('search');
+        // Base query for maintenance history
+        $maintenanceHistoryQuery = VehicleMaintenance::with('vehicle', 'performed_by_user');
+        if ($search) {
+            $maintenanceHistoryQuery->where(function ($query) use ($search) {
+                $query->whereHas('vehicle', function ($q) use ($search) {
+                    $q->where('RegID', 'like', '%' . $search . '%');
+                })
+                    ->orWhereDate('created_at', $search)
+                    ->orWhereDate('updated_at', $search);
+            });
+        }
+        $maintenanceHistory = $maintenanceHistoryQuery->get();
+        // Base query for pending requests
+        $pendingRequestsQuery = MaintenanceRequest::with('vehicle.branch', 'appliedBy', 'directorReviewer', 'committeeReviewer', 'finalDirectorApprover')
             ->whereIn('status', [
                 'pending',
                 'under_committee_review',
@@ -21,21 +33,30 @@ class MaintenanceController extends Controller
                 'committee_rejected',
                 'final_approved',
                 'final_rejected'
-            ])
-            ->get();
-        if (Auth::User()->role->role_name === 'committe-user') {
-            return view('dashboard.committe-user.maintenance', compact('maintenanceHistory', 'pendingRequests'));
+            ]);
+        if ($search) {
+            $pendingRequestsQuery->where(function ($query) use ($search) {
+                $query->whereHas('vehicle', function ($q) use ($search) {
+                    $q->where('RegID', 'like', '%' . $search . '%');
+                })->orWhere('issue', 'like', '%' . $search . '%')
+                    ->orWhereHas('appliedBy', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+        $pendingRequests = $pendingRequestsQuery->get();
+        // Return the appropriate view
+        if (Auth::user()->role->role_name === 'committe-user') {
+            return view('dashboard.committe-user.maintenance', compact('maintenanceHistory', 'pendingRequests', 'search'));
         } else {
-            return view('dashboard.shared.maintenance-history', compact('maintenanceHistory', 'pendingRequests'));
+            return view('dashboard.shared.maintenance-history', compact('maintenanceHistory', 'pendingRequests', 'search'));
         }
     }
-
     public function approve(Request $request, $id)
     {
         $maintenanceRequest = MaintenanceRequest::findOrFail($id);
         $user = Auth::user();
         $role = $user->role->role_name ?? '';
-
         if ($role === 'director-admin') {
             if ($maintenanceRequest->director_status === 'pending') {
                 // Initial director approval
@@ -57,18 +78,14 @@ class MaintenanceController extends Controller
         return redirect()->back()->with('success', 'Maintenance request approved.');
     }
 
-
     public function reject(Request $request, $id)
     {
         $maintenanceRequest = MaintenanceRequest::findOrFail($id);
         $user = Auth::user();
-
         $request->validate([
             'rejection_message' => 'required|string|max:1000',
         ]);
-
         $role = $user->role->role_name ?? '';
-
         if ($role === 'director-admin') {
             if ($maintenanceRequest->status === 'pending') {
                 $maintenanceRequest->director_status = 'rejected';
@@ -86,10 +103,42 @@ class MaintenanceController extends Controller
                 $maintenanceRequest->committee_rejection_message = $request->input('rejection_message');
             }
         }
-
         $maintenanceRequest->save();
-
         return redirect()->back()->with('success', 'Maintenance request rejected.');
     }
+
+    //vehicle-supervisor maintenance  completion report
+    public function vehicleMaintenance(Request $request)
+    {
+        $search = $request->query('search');
+        // Get all final approved maintenance requests
+        $pendingRequestsQuery = MaintenanceRequest::with('vehicle.branch', 'appliedBy', 'directorReviewer', 'committeeReviewer', 'finalDirectorApprover')
+            ->whereIn('status', ['final_approved']);
+        if ($search) {
+            $pendingRequestsQuery->where(function ($query) use ($search) {
+                $query->whereHas('vehicle', function ($q) use ($search) {
+                    $q->where('RegID', 'like', '%' . $search . '%');
+                })->orWhere('issue', 'like', '%' . $search . '%')
+                    ->orWhereHas('appliedBy', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+        $pendingRequests = $pendingRequestsQuery->get();
+        // Get all maintenance history
+        $maintenanceHistoryQuery = VehicleMaintenance::with('vehicle', 'performed_by_user');
+        if ($search) {
+            $maintenanceHistoryQuery->where(function ($query) use ($search) {
+                $query->whereHas('vehicle', function ($q) use ($search) {
+                    $q->where('RegID', 'like', '%' . $search . '%');
+                })
+                    ->orWhereDate('created_at', $search)
+                    ->orWhereDate('updated_at', $search);
+            });
+        }
+        $maintenanceHistory = $maintenanceHistoryQuery->get();
+        return view('dashboard.vehicle-supervisor.maintenance', compact('pendingRequests', 'maintenanceHistory', 'search'));
+    }
+
 
 }

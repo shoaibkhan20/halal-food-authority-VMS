@@ -12,13 +12,25 @@ use Illuminate\Validation\Rule;
 class UserController extends Controller
 {
     // Display all users
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with(['role', 'branch'])->latest()->get();
+        // Grab the 'search' query param, expected to be user ID or partial ID
+        $search = $request->query('search');
+        $query = User::with(['role', 'branch'])->latest();
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', '%' . $search . '%')
+                    ->orWhere('name', 'like', '%' . $search . '%');
+            });
+        }
+
+        $users = $query->get();
         $roles = UserRole::all();
         $branches = Branch::all();
+
         return view('dashboard.super-admin.role-management', compact('users', 'roles', 'branches'));
     }
+
 
     // Show form to create a new user
     // public function create()

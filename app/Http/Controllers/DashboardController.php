@@ -25,6 +25,8 @@ class DashboardController extends Controller
                 return redirect()->route('super-admin.dashboard');
             case 'director-admin':
                 return redirect()->route('director-admin.dashboard');
+            case 'vehicle-supervisor':
+                return redirect()->route('vehicle-supervisor.dashboard');
             case 'divisional-user':
                 return redirect()->route('director-admin.dashboard');
             case 'district-user':
@@ -35,7 +37,6 @@ class DashboardController extends Controller
                 abort(403, 'Unauthorized');
         }
     }
-
 
     public function dashboardStatistics()
     {

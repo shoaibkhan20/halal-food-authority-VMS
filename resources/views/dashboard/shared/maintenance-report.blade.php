@@ -9,23 +9,43 @@
                 </div>
 
                 <div class="flex justify-between">
-                    <div class="mb-6">
-                        <input type="text" placeholder="Report by ID" class="border border-gray-300 rounded px-4 py-2">
-                        <input type="text" placeholder="Report by Date" class="border border-gray-300 rounded px-4 py-2">
-                    </div>
+                    <form action="{{ route('report.maintenance') }}" method="GET" class="mb-6 flex gap-4 flex-wrap">
 
-                    {{-- <div class="mb-6">
-                        <select class="border border-gray-300 rounded px-4 py-2">
-                            <option>Last Month</option>
-                            <option>Last 3 Months</option>
-                            <option>All Time</option>
-                        </select>
-                    </div> --}}
+                        {{-- Reg ID Search --}}
+                        <div class="relative">
+                            <input type="text" name="reg_id" placeholder="Report by ID"
+                                class="border border-gray-300 rounded px-4 py-1 pr-8" value="{{ request('reg_id') }}">
+                            @if(request('reg_id'))
+                                <a href="{{ route('report.maintenance', array_filter(request()->except('reg_id'))) }}"
+                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    aria-label="Clear Reg ID Search">
+                                    &times;
+                                </a>
+                            @endif
+                        </div>
+
+                        {{-- Date Search --}}
+                        <div class="relative">
+                            <input type="text" name="date" placeholder="Report by Date (YYYY-MM-DD)"
+                                class="border border-gray-300 rounded px-4 py-1 pr-8" value="{{ request('date') }}">
+                            @if(request('date'))
+                                <a href="{{ route('report.maintenance', array_filter(request()->except('date'))) }}"
+                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    aria-label="Clear Date Search">
+                                    &times;
+                                </a>
+                            @endif
+                        </div>
+
+                        {{-- Optional: Search button if you don't want live submit --}}
+                        <button type="submit" class="bg-green-800 text-white px-4 py-1 rounded">Search</button>
+                    </form>
+
                 </div>
-        
+                {{--
+                <pre>{{ $records }}</pre> --}}
                 @php
                     $headers = ['Reg ID', 'Date', 'Cost', 'Items', 'Location'];
-
                     $rows = $records->map(function ($record) {
                         return [
                             $record['RegID'],

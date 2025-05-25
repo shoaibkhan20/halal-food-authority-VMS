@@ -99,11 +99,11 @@
         data: doughnutData,
         backgroundColor: [
           
-          '#4CAF50', // Green
+          '#9C27B0', // Green
           '#2196F3', // Blue
           '#FF9800', // Orange
           '#F44336', // Red
-          '#9C27B0', // Purple
+          '#4CAF50', // Purple
           '#FFEB3B'  // Yellow
           ],
       }]
