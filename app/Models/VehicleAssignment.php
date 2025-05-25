@@ -17,8 +17,6 @@ class VehicleAssignment extends Model
         'assigned_date',
         'returned_date',
     ];
-
-
     public function vehicle()
     {
         return $this->belongsTo(Vehicle::class, 'vehicle_id', 'RegID');

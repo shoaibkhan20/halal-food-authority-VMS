@@ -52,6 +52,8 @@ class MaintenanceController extends Controller
             return view('dashboard.shared.maintenance-history', compact('maintenanceHistory', 'pendingRequests', 'search'));
         }
     }
+
+    // request approve & rejection [committee & director]
     public function approve(Request $request, $id)
     {
         $maintenanceRequest = MaintenanceRequest::findOrFail($id);
@@ -77,7 +79,6 @@ class MaintenanceController extends Controller
         $maintenanceRequest->save();
         return redirect()->back()->with('success', 'Maintenance request approved.');
     }
-
     public function reject(Request $request, $id)
     {
         $maintenanceRequest = MaintenanceRequest::findOrFail($id);
@@ -107,7 +108,17 @@ class MaintenanceController extends Controller
         return redirect()->back()->with('success', 'Maintenance request rejected.');
     }
 
-    //vehicle-supervisor maintenance  completion report
+
+
+    // request approval & rejection [vehicle-supervisor] [actual maintenance]
+
+    //=======================================================
+    // TASK : remove the the pendingrequests from this function instead 
+    //        use maintenance history varibale with relationship data from maintenanceRequest table for this new maintenance
+    //        this way we may accept and reject , in the old way all final_approved requests are shown
+    //         
+    //=======================================================
+    
     public function vehicleMaintenance(Request $request)
     {
         $search = $request->query('search');
@@ -121,7 +132,7 @@ class MaintenanceController extends Controller
                 })->orWhere('issue', 'like', '%' . $search . '%')
                     ->orWhereHas('appliedBy', function ($q) use ($search) {
                         $q->where('name', 'like', '%' . $search . '%');
-                    });
+                });
             });
         }
         $pendingRequests = $pendingRequestsQuery->get();
@@ -138,6 +149,20 @@ class MaintenanceController extends Controller
         }
         $maintenanceHistory = $maintenanceHistoryQuery->get();
         return view('dashboard.vehicle-supervisor.maintenance', compact('pendingRequests', 'maintenanceHistory', 'search'));
+    }
+    public function acceptMaintenance(Request $request, $id)
+    {
+        $maintenanceRequest = VehicleMaintenance::findOrFail($id);
+        $maintenanceRequest->status = 'in_progress';
+        $maintenanceRequest->save();
+        return redirect()->back()->with('success', 'Maintenance request approved.');
+    }
+    public function cancelMaintenance(Request $request, $id)
+    {
+        $maintenanceRequest = VehicleMaintenance::findOrFail($id);
+        $maintenanceRequest->status = 'cancelled';
+        $maintenanceRequest->save();
+        return redirect()->back()->with('success', 'Maintenance request rejected.');
     }
 
 

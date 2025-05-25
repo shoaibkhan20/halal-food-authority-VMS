@@ -29,14 +29,12 @@ class MaintenanceRequest extends Model
     protected static function booted()
     {
         static::saving(function ($request) {
-
             // ✅ Final decision overrides all
             if ($request->director_final_status === 'approved') {
                 $request->status = 'final_approved';
             } elseif ($request->director_final_status === 'rejected') {
                 $request->status = 'final_rejected';
             }
-
             // ✅ If director approved and no final stage — mark as final
             elseif ($request->director_status === 'approved') {
                 $request->status = 'final_approved';
@@ -53,7 +51,6 @@ class MaintenanceRequest extends Model
                     $request->status = 'under_committee_review';
                 }
             }
-
             // ✅ Default fallback
             else {
                 $request->status = 'pending';
@@ -98,5 +95,9 @@ class MaintenanceRequest extends Model
     public function maintenance()
     {
         return $this->hasMany(VehicleMaintenance::class);
+    }
+    public function vehicleMaintenance()
+    {
+        return $this->hasOne(VehicleMaintenance::class);
     }
 }

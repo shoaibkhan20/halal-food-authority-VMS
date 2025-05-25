@@ -15,7 +15,6 @@ class VmsSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-
         // 1. Branches
         $branches = [];
         for ($i = 1; $i <= 5; $i++) {
@@ -110,8 +109,6 @@ class VmsSeeder extends Seeder
         }
 
         // 7. Maintenance Requests
-
-
         // Use the Eloquent model for insert
         $maintenanceIds = [];
 
@@ -120,7 +117,7 @@ class VmsSeeder extends Seeder
             $vehicleId = $faker->randomElement($vehicleIds);
 
             // Director decision
-            $directorStatus = $faker->randomElement(['approved', 'rejected', 'pending']);
+            $directorStatus = $faker->randomElement(['approved','rejected', 'pending']);
             $directorReviewedBy = $directorStatus !== 'pending' ? $faker->randomElement($users) : null;
             $directorRejectionMessage = $directorStatus === 'rejected' ? $faker->sentence : null;
 
@@ -141,11 +138,10 @@ class VmsSeeder extends Seeder
             $directorFinalRejectionMessage = null;
 
             if ($committeeStatus === 'approved') {
-                $directorFinalStatus = $faker->randomElement(['approved', 'rejected', 'pending']);
+                $directorFinalStatus = $faker->randomElement(['approved','rejected','pending']);
                 $directorFinalApprovedBy = $directorFinalStatus !== 'pending' ? $faker->randomElement($users) : null;
                 $directorFinalRejectionMessage = $directorFinalStatus === 'rejected' ? $faker->sentence : null;
             }
-
             // Create record
             $maintenanceRequest = MaintenanceRequest::create([
                 'vehicle_id' => $vehicleId,
@@ -156,20 +152,15 @@ class VmsSeeder extends Seeder
                 'director_status' => $directorStatus,
                 'director_reviewed_by' => $directorReviewedBy,
                 'director_rejection_message' => $directorRejectionMessage,
-
                 'committee_status' => $committeeStatus,
                 'committee_reviewed_by' => $committeeReviewedBy,
                 'committee_rejection_message' => $committeeRejectionMessage,
-
                 'director_final_status' => $directorFinalStatus,
                 'director_final_approved_by' => $directorFinalApprovedBy,
                 'director_final_rejection_message' => $directorFinalRejectionMessage,
             ]);
-
             $maintenanceIds[] = $maintenanceRequest->id;
         }
-
-
 
         // 8. Supervisor Reports
         foreach ($maintenanceIds as $mid) {
@@ -181,7 +172,6 @@ class VmsSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
-
         // 9. Fuel Requests
         for ($i = 1; $i <= 10; $i++) {
             DB::table('fuel_requests')->insert([
@@ -193,21 +183,19 @@ class VmsSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
-
         // 10. Vehicle Maintenance (NEW BLOCK)
         foreach ($maintenanceIds as $mid) {
-            DB::table('vehicle_maintenance')->insert([
-                'maintenance_request_id' => $mid,
-                'vehicle_id' => DB::table('maintenance_requests')->where('id', $mid)->value('vehicle_id'),
-                'status' => $faker->randomElement(['completed', 'in_progress', 'cancelled']),
-                'started_at' => now()->subDays(rand(2, 10)),
-                'completed_at' => now(),
-                'actual_cost' => $faker->randomFloat(2, 3000, 15000),
-                'maintenance_notes' => $faker->sentence,
-                'performed_by' => $faker->randomElement($users),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $maintenanceRequest = MaintenanceRequest::find($mid);
+            if ($maintenanceRequest->status === 'final_approved') {
+                DB::table('vehicle_maintenance')->insert([
+                    'maintenance_request_id' => $mid,
+                    'vehicle_id' => $maintenanceRequest->vehicle_id,
+                    'status' => $faker->randomElement(['not_started', 'completed', 'in_progress', 'cancelled']),
+                    'actual_cost' => $maintenanceRequest->estimated_cost,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
     }
 }

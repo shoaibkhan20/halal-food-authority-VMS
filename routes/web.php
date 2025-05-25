@@ -11,7 +11,6 @@ use App\Http\Controllers\VehicleController;
 // ====================
 // Public Routes
 // ====================
-
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
@@ -20,13 +19,11 @@ Route::middleware('guest')->group(function () {
 // Authenticated Routes
 // ====================
 Route::middleware('auth')->group(function () {
-
     // 🏠 Role Redirecting Dashboard Controller
     Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/home', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
     //shared routes
     Route::middleware('role:vehicle-supervisor,super-admin,director-admin,committe-user')->group(function(){
         Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
@@ -45,7 +42,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/maintenance/approve/{id}', [MaintenanceController::class, 'approve'])->name('maintenance.approve');
         Route::post('/maintenance/reject/{id}', [MaintenanceController::class, 'reject'])->name('maintenance.reject');
     });
-
     // Super Admin
     Route::prefix('super-admin')->middleware('role:super-admin')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('super-admin.dashboard');
@@ -69,6 +65,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('vehicle-supervisor')->middleware('role:vehicle-supervisor')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('vehicle-supervisor.dashboard');
         Route::get('/maintenance', [MaintenanceController::class, 'vehicleMaintenance'])->name('vehicle-supervisor.maintenance');
+        Route::post('/maintenance/accept/{id}', [MaintenanceController::class, 'acceptMaintenance'])->name('vehicle-supervisor.maintenance.accept');
+        Route::post('/maintenance/cancel/{id}', [MaintenanceController::class, 'cancelMaintenance'])->name('vehicle-supervisor.maintenance.cancel');
     });
     //  Divisional User
     Route::prefix('divisional-user')->middleware('role:divisional-user')->group(function () {

@@ -69,14 +69,14 @@
                                     $region = $record->vehicle->branch->location ?? 'N/A';
 
                                     $userRole = Auth::user()?->role?->role_name;
-                                    $approveRoute = route('maintenance.approve', ['id' => $record->id]);
-                                    $rejectRoute = route('maintenance.reject', ['id' => $record->id]);
+                                    $acceptRoute = route('vehicle-supervisor.maintenance.accept', ['id' => $record->id]);
+                                    $cancelRoute = route('vehicle-supervisor.maintenance.cancel', ['id' => $record->id]);
                                     $actions = '';
 
                                     if ($userRole === "vehicle-supervisor") {
                                         $actions .= '<div class="flex gap-2">';
                                         $actions .= '
-                                            <form method="POST" action="' . $approveRoute . '">
+                                            <form method="POST" action="' . $acceptRoute . '">
                                                 ' . csrf_field() . '
                                                 <button type="submit" class="btn btn-sm bg-green-800 text-white">Accept</button>
                                             </form>
@@ -84,7 +84,7 @@
                                         // Modal trigger for rejection
                                         // Modal trigger for rejection
                                         $actions .= '
-                                            <form method="POST" action="' . $approveRoute . '">
+                                            <form method="POST" action="' . $cancelRoute . '">
                                                 ' . csrf_field() . '
                                                 <button type="submit" class="btn btn-sm bg-red-800 text-white">Cancel</button>
                                             </form>
@@ -120,7 +120,7 @@
                                         $actions = '
                                             <form method="POST" >
                                                 ' . csrf_field() . '
-                                                <button type="submit" class="w-full btn btn-sm bg-green-800 text-white">Report</button>
+                                                <button type="submit" class="w-full btn btn-sm bg-green-800 text-white">Completion Report</button>
                                             </form>
                                         ';
                                         if ($record->status === 'completed') {

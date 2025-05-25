@@ -33,6 +33,10 @@ class VehicleMaintenance extends Model
     {
         return $this->belongsTo(MaintenanceRequest::class, 'maintenance_request_id');
     }
+     public function maintenanceRequest()
+    {
+        return $this->belongsTo(MaintenanceRequest::class);
+    }
 
     // 🔗 Performed by a user
     public function performed_by_user()
