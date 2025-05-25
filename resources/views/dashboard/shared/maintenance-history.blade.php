@@ -5,7 +5,7 @@
         <div class="w-full h-full overflow-y-auto rounded-lg bg-white backdrop:bg-gray/50">
             <div class="flex flex-col w-full p-8">
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold">Maintenance History</h1>
+                    <h1 class="text-3xl font-bold">Maintenance</h1>
                 </div>
 
                 <div class="flex justify-between">
@@ -53,7 +53,6 @@
                                     $userRole = Auth::user()?->role?->role_name;
                                     $approveRoute = route('maintenance.approve', ['id' => $record->id]);
                                     $rejectRoute = route('maintenance.reject', ['id' => $record->id]);
-
                                     $actions = '';
 
                                     if (in_array($userRole, ['director-admin'])) {
@@ -127,15 +126,36 @@
 
                         <x-table :headers="$headers" :rows="$rows" />
                     </div>
-
-
-                    <input type="radio" name="my_tabs_3" class="tab" aria-label="History" />
+                    <input type="radio" name="my_tabs_3" class="tab" aria-label="Requests History" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
+                        @php
+                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By',  'Region', 'Status'];
+                            $rows = $pendingRequests
+                                ->filter(fn($r) => in_array($r->status, ['committee_approved','committee_rejected','final_approved','final_rejected'])) // 🔥 Status filter here
+                                ->map(function ($record) {
+                                    $regId = $record->vehicle->RegID ?? 'N/A';
+                                    $issue = $record->issue;
+                                    $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
+                                    $appliedBy = $record->appliedBy->name ?? 'N/A';
+                                    $region = $record->vehicle->branch->location ?? 'N/A';
+                                    $rejectionReason = $record->status;
 
+                                    return [$regId, $issue, $cost, $appliedBy, $region,$rejectionReason ];
+                                })->toArray();
+                        @endphp
+
+                        <x-table :headers="$headers" :rows="$rows" />
+                    </div>
+
+
+                    <input type="radio" name="my_tabs_3" class="tab" aria-label="Maintenance History" />
+                    <div class="tab-content bg-base-100 border-base-300 p-6">
                         {{-- Maintenance History Table --}}
                         @php
                             $headers = ['Reg ID', 'Date', 'Cost', 'Items', 'Location', 'Status', 'Actions'];
-                            $rows = $maintenanceHistory->map(function ($record) {
+                            $rows = 
+                            $maintenanceHistory->filter(fn($r) => in_array($r->status, ['completed','in_progress'])) 
+                            ->map(function ($record) {
                                 $regId = $record->vehicle_id;
                                 $date = $record->started_at ?? 'N/A';
                                 $cost = $record->actual_cost ? '$' . number_format($record->actual_cost, 2) : 'N/A';
@@ -149,7 +169,6 @@
                                 return [$regId, $date, $cost, $items, $location, $status, $actions];
                             })->toArray();
                         @endphp
-
                         <x-table :headers="$headers" :rows="$rows" />
                     </div>
                 </div>
@@ -157,7 +176,7 @@
         </div>
     </div>
 
-    {{-- Modal for each maintenance record --}}
+    {{-- Modal for each maintenance bill --}}
     @foreach($maintenanceHistory as $record)
         <input type="checkbox" id="modal-{{ $record->id }}" class="modal-toggle" />
         <div class="modal" role="dialog">
@@ -177,5 +196,4 @@
             </div>
         </div>
     @endforeach
-
 @endsection

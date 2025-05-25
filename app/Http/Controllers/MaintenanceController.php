@@ -19,6 +19,8 @@ class MaintenanceController extends Controller
                 'under_committee_review',
                 'committee_approved',
                 'committee_rejected',
+                'final_approved',
+                'final_rejected'
             ])
             ->get();
         if (Auth::User()->role->role_name === 'committe-user') {

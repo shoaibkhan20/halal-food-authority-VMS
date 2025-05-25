@@ -1,35 +1,72 @@
 <!-- resources/views/super-admin/vehicle-info.blade.php -->
 @extends('layouts.app')
 @section('content')
-
-    <div class="w-full min-h-screen grid place-items-center">
-        <div class="w-full h-full grid place-items-center rounded-lg bg-white">
-            <div>
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold">Vehicle Information</h1>
-                </div>
-                <div class="mb-6">
-                    <input type="text" placeholder="Search Reg.id" class="w-full border border-gray-300 rounded px-4 py-2">
-                </div>
-                {{-- vehicle info boxes --}}
+    @if (request('search'))
+        <div class="w-full min-h-screen flex items-start justify-center">
+            <div class="w-[85%] h-full bg-white p-8 rounded-lg shadow-xl relative">
+                <h2 class="text-2xl font-bold text-center mb-6">Seached Vehicles</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    @foreach($vehicles->take(6) as $vehicle)
+                    @foreach($vehicles as $vehicle)
                         <button
                             onclick="showLiveLocationModal({{ $vehicle->latestLocation->latitude }}, {{ $vehicle->latestLocation->longitude }}, {{ $vehicle->latestLocation->speed }})"
                             class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
                             @if ($vehicle->Vehicle_Type === 'Mobile_lab')
-                            <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
                             @else
-                            <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
                             @endif
                             <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
                         </button>
                     @endforeach
+
+                </div>
+                <button onclick="window.history.back()"
+                    class="cursor-pointer absolute top-4 right-4 text-red-600 text-xl hover:text-red-800">
+                    &times;
+                </button>
+            </div>
+        </div>
+    @else
+        <div class="w-full min-h-screen grid place-items-center">
+            <div class="w-full h-full grid place-items-center rounded-lg bg-white">
+                <div class="">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold">Vehicle Information</h1>
+                    </div>
+                    <div class="mb-6 relative w-full">
+                        <form action="{{ route('vehicle.tracking') }}" method="GET">
+                            <input id="searchInput" name="search" type="text" autocomplete="off" placeholder="Search Reg.id"
+                                class="w-full border border-gray-300 rounded px-4 py-2" oninput="filterSearchDropdown()">
+                            <ul id="searchDropdown"
+                                class="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full max-h-40 overflow-y-auto shadow hidden">
+                                @foreach ($vehicles as $vehicle)
+                                    <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                        onclick="selectSearchItem('{{ $vehicle->RegID }}')">
+                                        {{ $vehicle->RegID }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </form>
+                    </div>
+                    {{-- vehicle info boxes --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        @foreach($vehicles->take(6) as $vehicle)
+                            <button
+                                onclick="showLiveLocationModal({{ $vehicle->latestLocation->latitude }}, {{ $vehicle->latestLocation->longitude }}, {{ $vehicle->latestLocation->speed }})"
+                                class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
+                                @if ($vehicle->Vehicle_Type === 'Mobile_lab')
+                                    <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                @else
+                                    <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                @endif
+                                <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
+    @endif
     <dialog id="my_modal_3" class="modal fixed top-0 hidden">
         <!-- Close Button Outside Modal Box -->
         <form method="dialog">
@@ -107,6 +144,37 @@
             if (!isInDialog) {
                 modal.close(); // Close modal on outside click
                 modal.classList.add('hidden');
+            }
+        });
+
+
+
+        //
+        const searchInput = document.getElementById('searchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+        function filterSearchDropdown() {
+            const filter = searchInput.value.toLowerCase();
+            const items = searchDropdown.querySelectorAll('li');
+            let anyVisible = false;
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const visible = text.includes(filter);
+                item.style.display = visible ? 'block' : 'none';
+                if (visible) anyVisible = true;
+            });
+            searchDropdown.classList.toggle('hidden', !anyVisible);
+        }
+        function selectSearchItem(value) {
+            searchInput.value = value;
+            searchDropdown.classList.add('hidden');
+            document.getElementById('searchForm').submit(); // auto-submit form
+        }
+
+        // Hide dropdown on click outside
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                searchDropdown.classList.add('hidden');
             }
         });
     </script>

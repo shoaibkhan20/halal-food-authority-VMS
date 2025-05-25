@@ -17,15 +17,33 @@ use App\Models\VehicleAssignment;
 class VehicleController extends Controller
 {
     //
-    public function vehicles()
+    public function vehicles(Request $request)
     {
+        $search = $request->input('search');
+        $regIds = Vehicle::select('RegID', 'Vehicle_Type')
+            ->when($search, function ($query, $search) {
+                return $query->where('RegID', 'LIKE', '%' . $search . '%');
+            }, function ($query) {
+                return $query->limit(6);
+            })
+            ->get();
+        $noResults = $search && $regIds->isEmpty();
+
         $branches = Branch::all();
         $vehicleTypes = VehicleType::all()->unique();
         $availableVehicles = Vehicle::where('status', 'Available')->get();
         $users = User::all();
-        $regIds = Vehicle::select('RegID', 'Vehicle_Type')->limit(6)->get();
-        return view('dashboard.shared.vehiclesinfo', compact('regIds', 'branches', 'vehicleTypes', 'users', 'availableVehicles'));
+
+        return view('dashboard.shared.vehiclesinfo', compact(
+            'regIds',
+            'branches',
+            'vehicleTypes',
+            'users',
+            'availableVehicles',
+            'noResults'
+        ));
     }
+
 
     public function store(Request $request)
     {
@@ -104,19 +122,34 @@ class VehicleController extends Controller
             'branch_id',
             'Average_mileage'
         ]));
-        
+
         return redirect()->back()->with('success', 'Vehicle updated successfully.');
     }
 
 
 
-    public function tracking()
+    public function tracking(Request $request)
     {
-        $vehicles = Vehicle::with('latestLocation')->has('locations')->get();
+        // Start the query to get vehicles with their latest location
+        $query = Vehicle::with('latestLocation')->has('locations');
 
-        return view('dashboard.shared.vehicle-tracking', compact('vehicles'));
+        // If search query is provided, filter based on RegID
+        if ($search = $request->input('search')) {
+            $query->where('RegID', 'LIKE', '%' . $search . '%');
+        }
+
+        // Fetch the filtered vehicles
+        $vehicles = $query->get();
+        // Return the filtered results to the view
+        return view('dashboard.shared.vehicle-tracking', compact('vehicles','emptySearch'));
     }
 
 
 
+    public function searchVehicle(Request $request)
+    {
+        $search = $request->input('search');
+        $vehicles = Vehicle::where('RegID', 'like', '%' . $search . '%')->get();
+        return view('dashboard.shared.vehicleSearch', compact('vehicles'));
+    }
 }

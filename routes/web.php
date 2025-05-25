@@ -26,10 +26,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
     //shared routes
     Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
         Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
         Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
+        Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
         Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('vehicle.maintenance');
         Route::get('/reporting', [ReportController::class, 'index'])->name('reports');
