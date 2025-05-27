@@ -89,6 +89,7 @@ class MaintenanceController extends Controller
                     'maintenance_request_id' => $maintenanceRequest->id,
                     'vehicle_id' => $maintenanceRequest->vehicle_id,
                     'status' => $status,
+                    'started_at' => now(),
                     'actual_cost' => $maintenanceRequest->estimated_cost,
                     'created_at' => now(),
                     'updated_at' => now(),

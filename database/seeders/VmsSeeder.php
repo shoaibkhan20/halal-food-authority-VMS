@@ -186,9 +186,13 @@ class VmsSeeder extends Seeder
             $maintenanestatus = $faker->randomElement(['completed', 'in_progress']);
             $started_at = '';
             $completed_at = '';
+            $maintenance_notes = '';
+            $perfomed_by = NULL;
             if($maintenanestatus === 'completed'){
                 $started_at = $faker->dateTimeBetween('-1 month', '-1 week');
                 $completed_at = $faker->dateTimeBetween('-1 week', 'now');
+                $maintenance_notes = $faker->paragraph;
+                $perfomed_by = $faker->randomElement($users);
             }else{
                 $started_at = $faker->dateTimeBetween('-1 month', 'now');
                 $completed_at = null;
@@ -200,6 +204,8 @@ class VmsSeeder extends Seeder
                     'status' => $maintenanestatus,
                     'started_at' => $started_at,
                     'completed_at' => $completed_at,
+                    'maintenance_notes' => $maintenance_notes,
+                    'performed_by' => $perfomed_by,
                     'actual_cost' => $maintenanceRequest->estimated_cost,
                     'created_at' => now(),
                     'updated_at' => now(),

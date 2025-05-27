@@ -20,7 +20,6 @@
                                 class="border border-gray-300 rounded px-4 py-1 w-full pr-8" 
                                 value="{{ request('search') }}"
                             >
-
                             @if(request('search'))
                             <a href="{{ route('vehicle-supervisor.maintenance') }}" 
                             class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
@@ -31,7 +30,6 @@
                             @endif
                         </form>
                     </div>
-
 
                     <div class="mb-6">
                         <select class="border border-gray-300 rounded px-4 py-1">
@@ -58,12 +56,30 @@
                                         // $items = $record->maintenance_notes ?? '—';
                                         $location = $record->vehicle->branch->location ?? 'N/A';
                                         $status = ucfirst($record->status);
-                                        $actions = '
-                                            <form method="POST" >
-                                                ' . csrf_field() . '
-                                                <button type="submit" class="w-full btn btn-sm bg-green-800 text-white">Completion Report</button>
-                                            </form>
+                                        $actions = '';
+                                        $actions .= '
+                                            <label for="reject-modal-' . $record->id . '" class="btn btn-sm bg-green-800 text-white hover:bg-green-700 transition">Completion Report</label>
                                         ';
+                                        // Modal content
+                                        $actions .= '
+                                                <input type="checkbox" id="reject-modal-' . $record->id . '" class="modal-toggle" />
+                                                <div class="modal">
+                                                    <div class="modal-box w-full max-w-lg">
+                                                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Reject Maintenance Request</h3>
+                                                        <form method="POST" action="' . route('maintenance.reject', ['id' => $record->id]) . '" class="space-y-4">
+                                                            ' . csrf_field() . '
+                                                            <div>
+                                                                
+                                                                <textarea name="rejection_message" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent" rows="4" placeholder="Reason for rejection..."></textarea>
+                                                            </div>
+                                                            <div class="flex justify-end gap-2 mt-6">
+                                                                <button type="submit" class="btn bg-red-800 text-white hover:bg-red-700 transition">Submit</button>
+                                                                <label for="reject-modal-' . $record->id . '" class="btn btn-outline">Cancel</label>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            ';
                                         if ($record->status === 'completed') {
                                             $actions = '<label for="modal-' . $record->id . '" class="btn btn-sm bg-green-800 text-white">Bill</label>';
                                         }
@@ -106,9 +122,9 @@
         <input type="checkbox" id="modal-{{ $record->id }}" class="modal-toggle" />
         <div class="modal" role="dialog">
             <div class="modal-box">
-                <h3 class="font-bold text-lg mb-2">Maintenance Bill - {{ $record->vehicle_id }}</h3>
+                <h1 class="font-bold text-lg mb-2">Maintenance Report - {{ $record->vehicle_id }}</h1>
                 <div class="space-y-1">
-                    <p><strong>Date:</strong> {{ optional($record->started_at)->format('Y-m-d') ?? 'N/A' }}</p>
+                    <p><strong>Date:</strong> {{ $record->started_at ?? 'N/A' }}</p>
                     <p><strong>Status:</strong> {{ ucfirst($record->status) }}</p>
                     <p><strong>Performed By:</strong> {{ $record->performed_by_user->name ?? 'N/A' }}</p>
                     <p><strong>Estimated Cost:</strong> ${{ number_format($record->estimated_cost, 2) }}</p>
