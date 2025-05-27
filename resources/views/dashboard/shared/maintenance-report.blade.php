@@ -45,13 +45,14 @@
                 {{--
                 <pre>{{ $records }}</pre> --}}
                 @php
-                    $headers = ['Reg ID', 'Date', 'Cost', 'Items', 'Location'];
+                    $headers = ['Reg ID', 'Date', 'Cost', 'Items','PerformedBy', 'Location'];
                     $rows = $records->map(function ($record) {
                         return [
                             $record['RegID'],
                             $record['Date'],
                             '$' . $record['Cost'],
-                            $record['Items'],
+                            $record['Items'] ?? 'N/A',
+                            $record['PerformedBy'],
                             $record['Location'],
                         ];
                     })->toArray();

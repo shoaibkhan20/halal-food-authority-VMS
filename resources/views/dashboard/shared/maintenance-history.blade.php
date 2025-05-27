@@ -72,23 +72,29 @@
 
                                     $userRole = Auth::user()?->role?->role_name;
                                     $approveRoute = route('maintenance.approve', ['id' => $record->id]);
+                                    $assignRoute = route('maintenance.assign', ['id' => $record->id]);
                                     $rejectRoute = route('maintenance.reject', ['id' => $record->id]);
                                     $actions = '';
 
                                     if (in_array($userRole, ['director-admin'])) {
                                         $actions .= '<div class="flex gap-2">';
                                         $actions .= '
-                                                                                                        <form method="POST" action="' . $approveRoute . '">
-                                                                                                            ' . csrf_field() . '
-                                                                                                            <button type="submit" class="btn btn-sm bg-green-800 text-white">Approve</button>
-                                                                                                        </form>
-                                                                                                    ';
-
+                                                    <form method="POST" action="' . $approveRoute . '">
+                                                        ' . csrf_field() . '
+                                                        <button type="submit" class="btn btn-sm bg-green-800 text-white">Approve</button>
+                                                    </form>
+                                                ';
                                         // Modal trigger for rejection
-                                        // Modal trigger for rejection
-                                        $actions .= '
-                                                                                                <label for="reject-modal-' . $record->id . '" class="btn btn-sm bg-red-800 text-white hover:bg-red-700 transition">Reject</label>
-                                                                                            </div>';
+                                    
+                                        if($status === 'pending') {
+                                            $actions.=' 
+                                            <label for="reject-modal-' . $record->id . '" class="btn btn-sm bg-red-800 text-white hover:bg-red-700 transition">Reject</label>
+                                            <form method="POST" action="' . $assignRoute . '">
+                                                    ' . csrf_field() . '
+                                                    <button type="submit" class="btn btn-sm bg-green-800 text-white">Assign</button>
+                                                </form>
+                                            </div>';
+                                        }           
 
                                         // Modal content
                                         $actions .= '
@@ -99,7 +105,7 @@
                                                         <form method="POST" action="' . $rejectRoute . '" class="space-y-4">
                                                             ' . csrf_field() . '
                                                             <div>
-                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Rejection Message</label>
+                                                                
                                                                 <textarea name="rejection_message" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent" rows="4" placeholder="Reason for rejection..."></textarea>
                                                             </div>
                                                             <div class="flex justify-end gap-2 mt-6">
@@ -128,7 +134,7 @@
                     <input type="radio" name="my_tabs_3" class="tab" aria-label="Under Committee Review" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         @php
-                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region', 'Reason'];
+                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region'];
                             $rows = $pendingRequests
                                 ->filter(fn($r) => in_array($r->status, ['under_committee_review'])) // 🔥 Status filter here
                                 ->map(function ($record) {
@@ -137,10 +143,8 @@
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
                                     $region = $record->vehicle->branch->location ?? 'N/A';
-                                    $rejectionReason = $record->director_rejection_message;
                                     $userRole = Auth::user()?->role?->role_name;
-
-                                    return [$regId, $issue, $cost, $appliedBy, $region, $rejectionReason];
+                                    return [$regId, $issue, $cost, $appliedBy, $region];
                                 })->toArray();
                         @endphp
 
@@ -149,29 +153,28 @@
                     <input type="radio" name="my_tabs_3" class="tab" aria-label="Requests History" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         @php
-                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region', 'Status'];
+                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region','Date', 'Status'];
                             $rows = $pendingRequests
-                                ->filter(fn($r) => in_array($r->status, ['committee_approved', 'committee_rejected', 'final_approved', 'final_rejected'])) // 🔥 Status filter here
+                                ->filter(fn($r) => in_array($r->status, ['committee_rejected', 'final_approved', 'final_rejected'])) // 🔥 Status filter here
                                 ->map(function ($record) {
                                     $regId = $record->vehicle->RegID ?? 'N/A';
                                     $issue = $record->issue;
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
                                     $region = $record->vehicle->branch->location ?? 'N/A';
+                                    $date = $record->updated_at->format('Y-m-d');
                                     $rejectionReason = $record->status;
-                                    return [$regId, $issue, $cost, $appliedBy, $region, $rejectionReason];
+                                    return [$regId, $issue, $cost, $appliedBy, $region,$date, $rejectionReason];
                                 })->toArray();
                         @endphp
-
                         <x-table :headers="$headers" :rows="$rows" />
                     </div>
-
 
                     <input type="radio" name="my_tabs_3" class="tab" aria-label="Maintenance History" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         {{-- Maintenance History Table --}}
                         @php
-                            $headers = ['Reg ID', 'Date', 'Cost', 'Items', 'Location', 'Status', 'Actions'];
+                            $headers = ['Reg ID', 'Date', 'Cost', 'Items', 'Location', 'Status', 'Report'];
                             $rows =
                                 $maintenanceHistory->filter(fn($r) => in_array($r->status, ['completed', 'in_progress']))
                                     ->map(function ($record) {

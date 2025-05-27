@@ -71,14 +71,47 @@ class MaintenanceController extends Controller
             }
         } elseif ($role === 'committe-user') {
             // Committee approval, only proceed if director already reviewed
-            if ($maintenanceRequest->director_status !== 'pending' && $maintenanceRequest->committee_status === 'pending') {
+            if ($maintenanceRequest->committee_status === 'pending') {
                 $maintenanceRequest->committee_status = 'approved';
                 $maintenanceRequest->committee_reviewed_by = $user->id;
             }
         }
         $maintenanceRequest->save();
+        // After save, check if status became final_approved
+        if ($maintenanceRequest->status === 'final_approved') {
+            $alreadyExists = VehicleMaintenance::where('maintenance_request_id', $maintenanceRequest->id)->exists();
+            if (!$alreadyExists) {
+                $status = 'in_progress';
+                if (!in_array($status, VehicleMaintenance::allowedStatuses())) {
+                    throw new \InvalidArgumentException("Invalid status: $status");
+                }
+                VehicleMaintenance::create([
+                    'maintenance_request_id' => $maintenanceRequest->id,
+                    'vehicle_id' => $maintenanceRequest->vehicle_id,
+                    'status' => $status,
+                    'actual_cost' => $maintenanceRequest->estimated_cost,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            }
+        }
         return redirect()->back()->with('success', 'Maintenance request approved.');
     }
+    public function assign(Request $request, $id)
+    {
+        $maintenanceRequest = MaintenanceRequest::findOrFail($id);
+        $user = Auth::user();
+        if ($maintenanceRequest->status === 'pending') {
+            $maintenanceRequest->status = 'under_committee_review';
+            $maintenanceRequest->director_status = 'waiting_for_committee';
+            $maintenanceRequest->director_reviewed_by = $user->id;
+            $maintenanceRequest->director_rejection_message = $request->input('rejection_message');
+        }
+        $maintenanceRequest->save();
+        return redirect()->back()->with('success', 'Maintenance request assigned to committee');
+    }
+
     public function reject(Request $request, $id)
     {
         $maintenanceRequest = MaintenanceRequest::findOrFail($id);
@@ -110,6 +143,8 @@ class MaintenanceController extends Controller
 
 
 
+
+
     // request approval & rejection [vehicle-supervisor] [actual maintenance]
 
     //=======================================================
@@ -118,24 +153,10 @@ class MaintenanceController extends Controller
     //        this way we may accept and reject , in the old way all final_approved requests are shown
     //         
     //=======================================================
-    
     public function vehicleMaintenance(Request $request)
     {
         $search = $request->query('search');
         // Get all final approved maintenance requests
-        $pendingRequestsQuery = MaintenanceRequest::with('vehicle.branch', 'appliedBy', 'directorReviewer', 'committeeReviewer', 'finalDirectorApprover')
-            ->whereIn('status', ['final_approved']);
-        if ($search) {
-            $pendingRequestsQuery->where(function ($query) use ($search) {
-                $query->whereHas('vehicle', function ($q) use ($search) {
-                    $q->where('RegID', 'like', '%' . $search . '%');
-                })->orWhere('issue', 'like', '%' . $search . '%')
-                    ->orWhereHas('appliedBy', function ($q) use ($search) {
-                        $q->where('name', 'like', '%' . $search . '%');
-                });
-            });
-        }
-        $pendingRequests = $pendingRequestsQuery->get();
         // Get all maintenance history
         $maintenanceHistoryQuery = VehicleMaintenance::with('vehicle', 'performed_by_user');
         if ($search) {
@@ -148,22 +169,7 @@ class MaintenanceController extends Controller
             });
         }
         $maintenanceHistory = $maintenanceHistoryQuery->get();
-        return view('dashboard.vehicle-supervisor.maintenance', compact('pendingRequests', 'maintenanceHistory', 'search'));
+        return view('dashboard.vehicle-supervisor.maintenance', compact( 'maintenanceHistory', 'search'));
     }
-    public function acceptMaintenance(Request $request, $id)
-    {
-        $maintenanceRequest = VehicleMaintenance::findOrFail($id);
-        $maintenanceRequest->status = 'in_progress';
-        $maintenanceRequest->save();
-        return redirect()->back()->with('success', 'Maintenance request approved.');
-    }
-    public function cancelMaintenance(Request $request, $id)
-    {
-        $maintenanceRequest = VehicleMaintenance::findOrFail($id);
-        $maintenanceRequest->status = 'cancelled';
-        $maintenanceRequest->save();
-        return redirect()->back()->with('success', 'Maintenance request rejected.');
-    }
-
 
 }

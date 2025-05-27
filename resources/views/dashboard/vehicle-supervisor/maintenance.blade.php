@@ -43,69 +43,10 @@
                 </div>
 
                 <div class="tabs tabs-lift">
-                    <input type="radio" name="my_tabs_3" class="tab" aria-label="Pending Requests" checked="checked" />
-
-                    <div class="tab-content bg-base-100 border-base-300 p-6">
-                        @if (session('success'))
-                            <div class="bg-green-200 text-green-800 p-4 mb-4 rounded-lg">
-                                {{ session('success') }}
-                            </div>
-                        @endif
-                        @if (session('error'))
-                            <div class="bg-red-200 text-red-800 p-4 mb-4 rounded-lg">
-                                {{ session('error') }}
-                            </div>
-                        @endif
-
-                        @php
-                            $headers = ['Reg ID', 'Issue', 'Estimated Cost', 'Applied By', 'Region', 'Actions'];
-
-                            $rows = $pendingRequests
-                                ->map(function ($record) {
-                                    $regId = $record->vehicle->RegID ?? 'N/A';
-                                    $issue = $record->issue;
-                                    $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
-                                    $appliedBy = $record->appliedBy->name ?? 'N/A';
-                                    $region = $record->vehicle->branch->location ?? 'N/A';
-
-                                    $userRole = Auth::user()?->role?->role_name;
-                                    $acceptRoute = route('vehicle-supervisor.maintenance.accept', ['id' => $record->id]);
-                                    $cancelRoute = route('vehicle-supervisor.maintenance.cancel', ['id' => $record->id]);
-                                    $actions = '';
-
-                                    if ($userRole === "vehicle-supervisor") {
-                                        $actions .= '<div class="flex gap-2">';
-                                        $actions .= '
-                                            <form method="POST" action="' . $acceptRoute . '">
-                                                ' . csrf_field() . '
-                                                <button type="submit" class="btn btn-sm bg-green-800 text-white">Accept</button>
-                                            </form>
-                                ';
-                                        // Modal trigger for rejection
-                                        // Modal trigger for rejection
-                                        $actions .= '
-                                            <form method="POST" action="' . $cancelRoute . '">
-                                                ' . csrf_field() . '
-                                                <button type="submit" class="btn btn-sm bg-red-800 text-white">Cancel</button>
-                                            </form>
-                                        </div>';
-                                    } else {
-                                        $actions .= '<button class="btn btn-sm bg-gray-500 text-white" disabled>No Access</button>';
-                                    }
-
-                                    return [$regId, $issue, $cost, $appliedBy, $region, $actions];
-                                })->toArray();
-                        @endphp
-                        <x-table :headers="$headers" :rows="$rows" />
-                    </div>
-                    {{--
-                    <pre>
-                        {{ $pendingRequests }}
-                    </pre> --}}
                 
-                    <input type="radio" name="my_tabs_3" class="tab" aria-label="UnderMaintenance Vehicles" />
+                
+                    <input type="radio" name="my_tabs_3" class="tab" aria-label="In progress" checked="checked"/>
                     <div class="tab-content bg-base-100 border-base-300 p-6">
-                        {{-- Maintenance History Table --}}
                         @php
                             $headers = ['Reg ID', 'Date', 'Cost', 'Location', 'Status', 'Actions'];
                             $rows =
@@ -138,7 +79,7 @@
                         @php
                             $headers = ['Reg ID', 'Date', 'Cost', 'Items', 'Location', 'Status', 'Actions'];
                             $rows =
-                                $maintenanceHistory->filter(fn($r) => in_array($r->status, ['completed', 'cancelled']))
+                                $maintenanceHistory->filter(fn($r) => in_array($r->status, ['completed']))
                                     ->map(function ($record) {
                                         $regId = $record->vehicle_id;
                                         $date = $record->started_at ?? 'N/A';
@@ -182,7 +123,6 @@
     @endforeach
 
     <script>
-        const pendingRequests = @json($pendingRequests);
         const maintenanceHistory = @json($maintenanceHistory);
     </script>
 @endsection

@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     // committee and director shared routes
     Route::middleware('role:director-admin,committe-user')->group(function () {
         Route::post('/maintenance/approve/{id}', [MaintenanceController::class, 'approve'])->name('maintenance.approve');
+        Route::post('/maintenance/assign/{id}', [MaintenanceController::class, 'assign'])->name('maintenance.assign');
         Route::post('/maintenance/reject/{id}', [MaintenanceController::class, 'reject'])->name('maintenance.reject');
     });
     // Super Admin
@@ -65,8 +66,6 @@ Route::middleware('auth')->group(function () {
     Route::prefix('vehicle-supervisor')->middleware('role:vehicle-supervisor')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('vehicle-supervisor.dashboard');
         Route::get('/maintenance', [MaintenanceController::class, 'vehicleMaintenance'])->name('vehicle-supervisor.maintenance');
-        Route::post('/maintenance/accept/{id}', [MaintenanceController::class, 'acceptMaintenance'])->name('vehicle-supervisor.maintenance.accept');
-        Route::post('/maintenance/cancel/{id}', [MaintenanceController::class, 'cancelMaintenance'])->name('vehicle-supervisor.maintenance.cancel');
     });
     //  Divisional User
     Route::prefix('divisional-user')->middleware('role:divisional-user')->group(function () {

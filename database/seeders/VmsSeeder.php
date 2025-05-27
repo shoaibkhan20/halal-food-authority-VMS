@@ -116,39 +116,37 @@ class VmsSeeder extends Seeder
             $appliedBy = $faker->randomElement($users);
             $vehicleId = $faker->randomElement($vehicleIds);
 
-            // Director decision
-            $directorStatus = $faker->randomElement(['approved','rejected', 'pending']);
+            // Independent statuses
+            $directorStatus = $faker->randomElement(['approved', 'rejected', 'pending','waiting_for_committee']);
+            $committeeStatus = 'pending';
+            if($directorStatus === 'waiting_for_committee') {
+                $committeeStatus = $faker->randomElement(['approved', 'rejected', 'pending']);
+            }
+
+            // Director review logic
             $directorReviewedBy = $directorStatus !== 'pending' ? $faker->randomElement($users) : null;
             $directorRejectionMessage = $directorStatus === 'rejected' ? $faker->sentence : null;
 
-            // Committee status only matters if director rejected
-            $committeeStatus = 'pending';
-            $committeeReviewedBy = null;
-            $committeeRejectionMessage = null;
+            // Committee review logic
+            $committeeReviewedBy = $committeeStatus !== 'pending' ? $faker->randomElement($users) : null;
+            $committeeRejectionMessage = $committeeStatus === 'rejected' ? $faker->sentence : null;
 
-            if ($directorStatus === 'rejected') {
-                $committeeStatus = $faker->randomElement(['approved', 'rejected', 'pending']);
-                $committeeReviewedBy = $committeeStatus !== 'pending' ? $faker->randomElement($users) : null;
-                $committeeRejectionMessage = $committeeStatus === 'rejected' ? $faker->sentence : null;
-            }
-
-            // Final approval only if committee approved
+            // Final director status logic (still only if committee approved)
             $directorFinalStatus = 'pending';
             $directorFinalApprovedBy = null;
             $directorFinalRejectionMessage = null;
 
             if ($committeeStatus === 'approved') {
-                $directorFinalStatus = $faker->randomElement(['approved','rejected','pending']);
+                $directorFinalStatus = 'approved';
                 $directorFinalApprovedBy = $directorFinalStatus !== 'pending' ? $faker->randomElement($users) : null;
                 $directorFinalRejectionMessage = $directorFinalStatus === 'rejected' ? $faker->sentence : null;
             }
-            // Create record
+
             $maintenanceRequest = MaintenanceRequest::create([
                 'vehicle_id' => $vehicleId,
                 'applied_by' => $appliedBy,
                 'issue' => $faker->words(3, true),
                 'estimated_cost' => $faker->randomFloat(2, 5000, 30000),
-
                 'director_status' => $directorStatus,
                 'director_reviewed_by' => $directorReviewedBy,
                 'director_rejection_message' => $directorRejectionMessage,
@@ -161,7 +159,6 @@ class VmsSeeder extends Seeder
             ]);
             $maintenanceIds[] = $maintenanceRequest->id;
         }
-
         // 8. Supervisor Reports
         foreach ($maintenanceIds as $mid) {
             DB::table('vehicle_supervisor_reports')->insert([
@@ -186,11 +183,23 @@ class VmsSeeder extends Seeder
         // 10. Vehicle Maintenance (NEW BLOCK)
         foreach ($maintenanceIds as $mid) {
             $maintenanceRequest = MaintenanceRequest::find($mid);
+            $maintenanestatus = $faker->randomElement(['completed', 'in_progress']);
+            $started_at = '';
+            $completed_at = '';
+            if($maintenanestatus === 'completed'){
+                $started_at = $faker->dateTimeBetween('-1 month', '-1 week');
+                $completed_at = $faker->dateTimeBetween('-1 week', 'now');
+            }else{
+                $started_at = $faker->dateTimeBetween('-1 month', 'now');
+                $completed_at = null;
+            }
             if ($maintenanceRequest->status === 'final_approved') {
                 DB::table('vehicle_maintenance')->insert([
                     'maintenance_request_id' => $mid,
                     'vehicle_id' => $maintenanceRequest->vehicle_id,
-                    'status' => $faker->randomElement(['not_started', 'completed', 'in_progress', 'cancelled']),
+                    'status' => $maintenanestatus,
+                    'started_at' => $started_at,
+                    'completed_at' => $completed_at,
                     'actual_cost' => $maintenanceRequest->estimated_cost,
                     'created_at' => now(),
                     'updated_at' => now(),

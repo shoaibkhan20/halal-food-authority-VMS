@@ -115,7 +115,7 @@ class CreateVmsTables extends Migration
             $table->enum('status', ['pending', 'under_committee_review', 'committee_approved', 'committee_rejected', 'final_approved', 'final_rejected'])->default('pending');
 
             // Director's Initial Review
-            $table->enum('director_status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('director_status', ['pending', 'approved', 'rejected','waiting_for_committee'])->default('pending');
             $table->foreignId('director_reviewed_by')->nullable()->constrained('users')->onDelete('set null');
             $table->text('director_rejection_message')->nullable();
 
@@ -141,7 +141,7 @@ class CreateVmsTables extends Migration
             $table->foreignId('maintenance_request_id')->constrained('maintenance_requests')->onDelete('cascade');
             $table->string('vehicle_id');
             $table->foreign('vehicle_id')->references('RegID')->on('vehicles')->onDelete('cascade');
-            $table->enum('status', ['not_started', 'in_progress', 'completed', 'cancelled'])->default('not_started');
+            $table->enum('status', ['in_progress', 'completed'])->default('in_progress');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->decimal('actual_cost', 10, 2)->nullable();

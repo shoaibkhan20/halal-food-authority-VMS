@@ -39,26 +39,19 @@ class MaintenanceRequest extends Model
             elseif ($request->director_status === 'approved') {
                 $request->status = 'final_approved';
             }
-
             // ✅ If director rejected, move to committee review
             elseif ($request->director_status === 'rejected') {
                 // Only then allow committee to change status
-                if ($request->committee_status === 'approved') {
-                    $request->status = 'committee_approved';
-                } elseif ($request->committee_status === 'rejected') {
-                    $request->status = 'committee_rejected';
-                } else {
-                    $request->status = 'under_committee_review';
-                }
+                $request->status = 'final_rejected';
             }
-            // ✅ Default fallback
-            else {
-                $request->status = 'pending';
+            elseif($request->committee_status === 'approved'){
+                $request->status = 'committee_approved';
             }
+            else if ($request->committee_status === 'rejected') {
+                $request->status = 'committee_rejected';
+            } 
         });
     }
-
-
 
     // Relationships
     public function vehicle()

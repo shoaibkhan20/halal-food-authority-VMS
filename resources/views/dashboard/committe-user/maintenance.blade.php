@@ -5,7 +5,7 @@
         <div class="w-full h-full overflow-y-auto rounded-lg bg-white backdrop:bg-gray/50">
             <div class="flex flex-col w-full p-8">
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold">Maintenance History Committe</h1>
+                    <h1 class="text-3xl font-bold">Maintenance</h1>
 
                     {{-- <pre>{{$pendingRequests}}</pre> --}}
                 </div>
@@ -35,7 +35,7 @@
                             </div>
                         @endif
                         @php
-                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region', 'Rejection Reason' ,'Rejected By', 'Actions'];
+                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region','Actions'];
                             $rows = $pendingRequests
                                 ->filter(fn($r) => in_array($r->status, ['under_committee_review'])) // 🔥 Status filter here
                                 ->map(function ($record) {
@@ -44,8 +44,6 @@
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
                                     $region = $record->vehicle->branch->location ?? 'N/A';
-                                    $rejectionReason = $record->director_rejection_message;
-                                    $rejectedby = $record->directorReviewer->name;
 
                                     $userRole = Auth::user()?->role?->role_name;
                                     $approveRoute = route('maintenance.approve', ['id' => $record->id]);
@@ -82,7 +80,7 @@
                                             </div>
                                         </div>
                                     ';
-                                    return [$regId, $issue, $cost, $appliedBy, $region,$rejectionReason ,$rejectedby, $actions];
+                                    return [$regId, $issue, $cost, $appliedBy, $region, $actions];
                                 })->toArray();
                         @endphp
 

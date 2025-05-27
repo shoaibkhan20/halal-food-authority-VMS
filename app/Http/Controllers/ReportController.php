@@ -94,6 +94,7 @@ class ReportController extends Controller
                     'Date' => $record->completed_at ? Carbon::parse($record->completed_at)->format('Y-m-d') : 'N/A',
                     'Cost' => number_format($record->actual_cost, 2),
                     'Items' => $record->maintenance_notes,
+                    'PerformedBy' => $record->performed_by ?? 'N/A',
                     'Location' => $record->vehicle->branch->location ?? 'N/A',
                 ];
             });

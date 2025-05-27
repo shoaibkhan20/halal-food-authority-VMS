@@ -8,6 +8,10 @@ class VehicleMaintenance extends Model
 {
     protected $table = 'vehicle_maintenance';
 
+    public static function allowedStatuses()
+    {
+        return ['in_progress', 'completed'];
+    }
     protected $casts = [
         'completed_at' => 'datetime',
     ];
@@ -27,13 +31,12 @@ class VehicleMaintenance extends Model
     {
         return $this->belongsTo(Vehicle::class, 'vehicle_id', 'RegID');
     }
-
     // 🔗 Belongs to a maintenance request
     public function request()
     {
         return $this->belongsTo(MaintenanceRequest::class, 'maintenance_request_id');
     }
-     public function maintenanceRequest()
+    public function maintenanceRequest()
     {
         return $this->belongsTo(MaintenanceRequest::class);
     }
