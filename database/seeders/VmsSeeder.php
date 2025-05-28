@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Faker\Factory as Faker;
 use App\Models\VehicleType; // Ensure this is correctly imported
 use App\Models\MaintenanceRequest;
+use App\Models\VehicleMaintenance;
 use App\Models\User;
 use App\Models\Vehicle;
 class VmsSeeder extends Seeder
@@ -117,9 +118,9 @@ class VmsSeeder extends Seeder
             $vehicleId = $faker->randomElement($vehicleIds);
 
             // Independent statuses
-            $directorStatus = $faker->randomElement(['approved', 'rejected', 'pending','waiting_for_committee']);
+            $directorStatus = $faker->randomElement(['approved', 'rejected', 'pending', 'waiting_for_committee']);
             $committeeStatus = 'pending';
-            if($directorStatus === 'waiting_for_committee') {
+            if ($directorStatus === 'waiting_for_committee') {
                 $committeeStatus = $faker->randomElement(['approved', 'rejected', 'pending']);
             }
 
@@ -159,41 +160,16 @@ class VmsSeeder extends Seeder
             ]);
             $maintenanceIds[] = $maintenanceRequest->id;
         }
-        // 8. Supervisor Reports
-        foreach ($maintenanceIds as $mid) {
-            DB::table('vehicle_supervisor_reports')->insert([
-                'maintenance_request_id' => $mid,
-                'user_id' => $faker->randomElement($users),
-                'report' => $faker->paragraph,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-        // 9. Fuel Requests
-        for ($i = 1; $i <= 10; $i++) {
-            DB::table('fuel_requests')->insert([
-                'vehicle_id' => $faker->randomElement($vehicleIds),
-                'user_id' => $faker->randomElement($users),
-                'fuel_amount' => $faker->randomFloat(2, 10, 60),
-                'status' => $faker->randomElement(['pending', 'approved', 'rejected']),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-        // 10. Vehicle Maintenance (NEW BLOCK)
+        // 8. Vehicle Maintenance (NEW BLOCK)
         foreach ($maintenanceIds as $mid) {
             $maintenanceRequest = MaintenanceRequest::find($mid);
             $maintenanestatus = $faker->randomElement(['completed', 'in_progress']);
             $started_at = '';
             $completed_at = '';
-            $maintenance_notes = '';
-            $perfomed_by = NULL;
-            if($maintenanestatus === 'completed'){
+            if ($maintenanestatus === 'completed') {
                 $started_at = $faker->dateTimeBetween('-1 month', '-1 week');
                 $completed_at = $faker->dateTimeBetween('-1 week', 'now');
-                $maintenance_notes = $faker->paragraph;
-                $perfomed_by = $faker->randomElement($users);
-            }else{
+            } else {
                 $started_at = $faker->dateTimeBetween('-1 month', 'now');
                 $completed_at = null;
             }
@@ -204,13 +180,39 @@ class VmsSeeder extends Seeder
                     'status' => $maintenanestatus,
                     'started_at' => $started_at,
                     'completed_at' => $completed_at,
-                    'maintenance_notes' => $maintenance_notes,
-                    'performed_by' => $perfomed_by,
                     'actual_cost' => $maintenanceRequest->estimated_cost,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
         }
+        // 9. Supervisor Reports
+        foreach ($maintenanceIds as $mid) {
+            $vehicleMaintenance = VehicleMaintenance::where('maintenance_request_id', $mid)->first();
+            if ($vehicleMaintenance && $vehicleMaintenance->status === "completed") {
+                DB::table('vehicle_supervisor_reports')->insert([
+                    'vehicle_maintenance_id' => $vehicleMaintenance->id,
+                    'generated_by' => $faker->randomElement($users),
+                    'maintenance_notes' => $faker->paragraph,
+                    'mechanic_info' => $faker->name . ' - ' . $faker->company,
+                    'report_file_path' => 'supervisor_reports/uNoeDsI6qkAfnX0ehQzOqZwqSM2mmxgkT9ufnStz.pdf',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // 10. Fuel Requests
+        for ($i = 1; $i <= 10; $i++) {
+            DB::table('fuel_requests')->insert([
+                'vehicle_id' => $faker->randomElement($vehicleIds),
+                'user_id' => $faker->randomElement($users),
+                'fuel_amount' => $faker->randomFloat(2, 10, 60),
+                'status' => $faker->randomElement(['pending', 'approved', 'rejected']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
     }
 }

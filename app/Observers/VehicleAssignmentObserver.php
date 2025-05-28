@@ -21,7 +21,6 @@ class VehicleAssignmentObserver
             $isStillAssigned = VehicleAssignment::where('vehicle_id', $assignment->vehicle_id)
                 ->whereNull('returned_date')
                 ->exists();
-
             Vehicle::where('RegID', $assignment->vehicle_id)
                 ->update(['status' => $isStillAssigned ? 'Assigned' : 'Available']);
         }

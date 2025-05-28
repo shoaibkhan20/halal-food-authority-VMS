@@ -115,7 +115,7 @@ class CreateVmsTables extends Migration
             $table->enum('status', ['pending', 'under_committee_review', 'committee_approved', 'committee_rejected', 'final_approved', 'final_rejected'])->default('pending');
 
             // Director's Initial Review
-            $table->enum('director_status', ['pending', 'approved', 'rejected','waiting_for_committee'])->default('pending');
+            $table->enum('director_status', ['pending', 'approved', 'rejected', 'waiting_for_committee'])->default('pending');
             $table->foreignId('director_reviewed_by')->nullable()->constrained('users')->onDelete('set null');
             $table->text('director_rejection_message')->nullable();
 
@@ -134,7 +134,6 @@ class CreateVmsTables extends Migration
             $table->timestamps();
         });
 
-
         // 10. Vehicle Maintenance Table
         Schema::create('vehicle_maintenance', function (Blueprint $table) {
             $table->id();
@@ -145,19 +144,20 @@ class CreateVmsTables extends Migration
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->decimal('actual_cost', 10, 2)->nullable();
-            $table->text('maintenance_notes')->nullable();
-            $table->foreignId('performed_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
 
         // 11. Vehicle Supervisor Reports Table
         Schema::create('vehicle_supervisor_reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('maintenance_request_id')->constrained('maintenance_requests')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->text('report');
+            $table->foreignId('vehicle_maintenance_id')->constrained('vehicle_maintenance')->onDelete('cascade');
+            $table->foreignId('generated_by')->constrained('users')->onDelete('cascade');
+            $table->text('maintenance_notes')->nullable();
+            $table->text('mechanic_info')->nullable();
+            $table->string('report_file_path');
             $table->timestamps();
         });
+
 
         // 12. Fuel Requests Table
         Schema::create('fuel_requests', function (Blueprint $table) {

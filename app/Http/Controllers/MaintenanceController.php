@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\VehicleMaintenance;
 use App\Models\MaintenanceRequest;
+use App\Models\VehicleSupervisorReport;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Storage;
 class MaintenanceController extends Controller
 {
 
@@ -13,7 +15,7 @@ class MaintenanceController extends Controller
     {
         $search = $request->query('search');
         // Base query for maintenance history
-        $maintenanceHistoryQuery = VehicleMaintenance::with('vehicle', 'performed_by_user');
+        $maintenanceHistoryQuery = VehicleMaintenance::with('vehicle', 'supervisorReports');
         if ($search) {
             $maintenanceHistoryQuery->where(function ($query) use ($search) {
                 $query->whereHas('vehicle', function ($q) use ($search) {
@@ -146,20 +148,14 @@ class MaintenanceController extends Controller
 
 
 
-    // request approval & rejection [vehicle-supervisor] [actual maintenance]
-
-    //=======================================================
-    // TASK : remove the the pendingrequests from this function instead 
-    //        use maintenance history varibale with relationship data from maintenanceRequest table for this new maintenance
-    //        this way we may accept and reject , in the old way all final_approved requests are shown
-    //         
-    //=======================================================
+    // request displaying and completion of report [vehicle-supervisor]
     public function vehicleMaintenance(Request $request)
     {
         $search = $request->query('search');
+        $users = User::all();
         // Get all final approved maintenance requests
         // Get all maintenance history
-        $maintenanceHistoryQuery = VehicleMaintenance::with('vehicle', 'performed_by_user');
+        $maintenanceHistoryQuery = VehicleMaintenance::with('vehicle', 'supervisorReports');
         if ($search) {
             $maintenanceHistoryQuery->where(function ($query) use ($search) {
                 $query->whereHas('vehicle', function ($q) use ($search) {
@@ -170,7 +166,11 @@ class MaintenanceController extends Controller
             });
         }
         $maintenanceHistory = $maintenanceHistoryQuery->get();
-        return view('dashboard.vehicle-supervisor.maintenance', compact( 'maintenanceHistory', 'search'));
+        return view('dashboard.vehicle-supervisor.maintenance', compact('maintenanceHistory', 'search', 'users'));
     }
+
+
+    
+
 
 }

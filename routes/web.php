@@ -19,17 +19,14 @@ Route::middleware('guest')->group(function () {
 // Authenticated Routes
 // ====================
 Route::middleware('auth')->group(function () {
-    // 🏠 Role Redirecting Dashboard Controller
     Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/home', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
+    Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
+    Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
     //shared routes
-    Route::middleware('role:vehicle-supervisor,super-admin,director-admin,committe-user')->group(function(){
-        Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
-        Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
-        Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
-    });
     Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
         Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('vehicle.maintenance');
@@ -66,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('vehicle-supervisor')->middleware('role:vehicle-supervisor')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('vehicle-supervisor.dashboard');
         Route::get('/maintenance', [MaintenanceController::class, 'vehicleMaintenance'])->name('vehicle-supervisor.maintenance');
+        Route::post('/maintenance/report/{id}', [ReportController::class, 'createSupervisorReport'])->name('vehicle-maintenance.complete');
     });
     //  Divisional User
     Route::prefix('divisional-user')->middleware('role:divisional-user')->group(function () {
