@@ -30,7 +30,7 @@ class DashboardController extends Controller
             case 'divisional-user':
                 return redirect()->route('director-admin.dashboard');
             case 'district-user':
-                return redirect()->route('director-admin.dashboard');
+                return redirect()->route('district-user.dashboard');
             case 'committe-user':
                 return redirect()->route('committe-user.dashboard');
             default:
@@ -41,7 +41,7 @@ class DashboardController extends Controller
     public function dashboardStatistics()
     {
         // Summary counts
-        $totalFuelRequests = FuelRequest::count();
+        $totalFuelRequests = FuelRequest::where('status','pending')->count();
         $pendingMaintenanceRequests = MaintenanceRequest::where('status', 'pending')->count();
         $totalVehicles = Vehicle::count();
         $totalApplications = $totalFuelRequests + $pendingMaintenanceRequests;

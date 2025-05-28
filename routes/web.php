@@ -26,9 +26,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
     Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
     Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
+    
     //shared routes
-    Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
+    Route::middleware('role:super-admin,director-admin,committe-user,district-user')->group(function(){
         Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
+    });
+
+    Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('vehicle.maintenance');
         Route::get('/reporting', [ReportController::class, 'index'])->name('reports');
         Route::get('/reporting/vehicle-status', [ReportController::class, 'vehicleStatus'])->name('report.vehicle-status');
