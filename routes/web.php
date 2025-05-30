@@ -30,11 +30,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
 
     //vehicle tracking
-    Route::middleware('role:super-admin,director-admin,committe-user,district-user')->group(function(){
+    Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function(){
         Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
     });
-    Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
+    // review maintenance
+     Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('vehicle.maintenance');
+    });
+    Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
         Route::get('/reporting', [ReportController::class, 'index'])->name('reports');
         Route::get('/reporting/vehicle-status', [ReportController::class, 'vehicleStatus'])->name('report.vehicle-status');
         Route::get('/reporting/maintenance-report', [ReportController::class, 'MaintenanceReport'])->name('report.maintenance');

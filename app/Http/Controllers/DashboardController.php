@@ -28,7 +28,7 @@ class DashboardController extends Controller
             case 'vehicle-supervisor':
                 return redirect()->route('vehicle-supervisor.dashboard');
             case 'divisional-user':
-                return redirect()->route('director-admin.dashboard');
+                return redirect()->route('divisional-user.dashboard');
             case 'district-user':
                 return redirect()->route('district-user.dashboard');
             case 'committe-user':
