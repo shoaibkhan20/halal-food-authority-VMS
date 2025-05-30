@@ -30,7 +30,7 @@ class ReportController extends Controller
                 'Model' => $vehicle->Model,
                 'AssignedTo' => $vehicle->latestAssignment->user->name ?? 'Unassigned',
                 'Status' => $vehicle->status,
-                'Location' => $vehicle->branch->location ?? 'Unknown',
+                'Location' => $vehicle->branch->district ?? 'Unknown',
             ];
         });
 
@@ -60,7 +60,7 @@ class ReportController extends Controller
                 'Model' => $vehicle->Model,
                 'AssignedTo' => $currentAssignment?->user->name ?? null,
                 'status' => $vehicle->status,
-                'Region' => $vehicle->branch->location ?? 'Unknown',
+                'Region' => $vehicle->branch->district ?? 'Unknown',
                 'under_maintenance' => $vehicle->maintenanceRecords->where('status', 'in_progress')->isNotEmpty(),
             ];
         });
@@ -93,7 +93,7 @@ class ReportController extends Controller
                     'Cost' => number_format($record->actual_cost, 2),
                     'Items' => $record->supervisorReports()->first()->maintenance_notes ?? 'N/A',
                     'PerformedBy' => $record->supervisorReports->first()->supervisor->name ?? 'N/A',
-                    'Location' => $record->vehicle->branch->location ?? 'N/A',
+                    'Location' => $record->vehicle->branch->district ?? 'N/A',
                 ];
             });
 

@@ -11,14 +11,13 @@
                             onclick="showLiveLocationModal({{ $vehicle->latestLocation->latitude }}, {{ $vehicle->latestLocation->longitude }}, {{ $vehicle->latestLocation->speed }})"
                             class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
                             @if ($vehicle->Vehicle_Type === 'Mobile_lab')
-                                <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                vcx<img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
                             @else
                                 <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
                             @endif
                             <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
                         </button>
                     @endforeach
-
                 </div>
                 <button onclick="window.history.back()"
                     class="cursor-pointer absolute top-4 right-4 text-red-600 text-xl hover:text-red-800">

@@ -10,8 +10,26 @@
                     {{-- <pre>{{$pendingRequests}}</pre> --}}
                 </div>
                 <div class="flex justify-between">
-                    <div class="mb-6">
-                        <input type="text" placeholder="Search Reg.id" class="border border-gray-300 rounded px-4 py-2">
+                    <div class="mb-6 relative w-full max-w-xs">
+                        <form action="{{ route('vehicle.maintenance') }}" method="GET">
+                            <input 
+                                type="text" 
+                                id="filterSearch" 
+                                name="search" 
+                                placeholder="Search Reg.id" 
+                                class="border border-gray-300 rounded px-4 py-2 w-full pr-8" 
+                                value="{{ request('search') }}"
+                            >
+
+                            @if(request('search'))
+                            <a href="{{ route('vehicle.maintenance') }}" 
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            aria-label="Clear search"
+                            >
+                                &times;
+                            </a>
+                            @endif
+                        </form>
                     </div>
                     <div class="mb-6">
                         <select class="border border-gray-300 rounded px-4 py-2">
@@ -43,7 +61,7 @@
                                     $issue = $record->issue;
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
-                                    $region = $record->vehicle->branch->location ?? 'N/A';
+                                    $region = $record->vehicle->branch->district ?? 'N/A';
 
                                     $userRole = Auth::user()?->role?->role_name;
                                     $approveRoute = route('maintenance.approve', ['id' => $record->id]);
@@ -86,13 +104,10 @@
 
                         <x-table :headers="$headers" :rows="$rows" />
                     </div>
-
-                
-
                     <input type="radio" name="my_tabs_3" class="tab" aria-label="History" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         @php
-                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region', 'Status'];
+                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region', 'Status' , 'Date'];
                             $rows = $pendingRequests
                                 ->filter(fn($r) => in_array($r->status, ['committee_approved', 'committee_rejected', 'final_approved', 'final_rejected'])) // 🔥 Status filter here
                                 ->map(function ($record) {
@@ -100,9 +115,10 @@
                                     $issue = $record->issue;
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
-                                    $region = $record->vehicle->branch->location ?? 'N/A';
-                                    $rejectionReason = $record->status;
-                                    return [$regId, $issue, $cost, $appliedBy, $region, $rejectionReason];
+                                    $region = $record->vehicle->branch->district ?? 'N/A';
+                                    $Status = $record->status;
+                                    $date = $record->updated_at->format('d M Y');;
+                                    return [$regId, $issue, $cost, $appliedBy, $region, $Status , $date];
                                 })->toArray();
                         @endphp
 

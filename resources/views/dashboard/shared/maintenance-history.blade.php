@@ -68,7 +68,7 @@
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
                                     $status = ucfirst($record->status);
-                                    $region = $record->vehicle->branch->location ?? 'N/A';
+                                    $region = $record->vehicle->branch->district ?? 'N/A';
                                     $userRole = Auth::user()?->role?->role_name;
                                     $approveRoute = route('maintenance.approve', ['id' => $record->id]);
                                     $assignRoute = route('maintenance.assign', ['id' => $record->id]);
@@ -141,7 +141,7 @@
                                     $issue = $record->issue;
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
-                                    $region = $record->vehicle->branch->location ?? 'N/A';
+                                    $region = $record->vehicle->branch->district ?? 'N/A';
                                     $userRole = Auth::user()?->role?->role_name;
                                     return [$regId, $issue, $cost, $appliedBy, $region];
                                 })->toArray();
@@ -160,7 +160,7 @@
                                     $issue = $record->issue;
                                     $cost = $record->estimated_cost ? '$' . number_format($record->estimated_cost, 2) : 'N/A';
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
-                                    $region = $record->vehicle->branch->location ?? 'N/A';
+                                    $region = $record->vehicle->branch->district ?? 'N/A';
                                     $date = $record->updated_at->format('Y-m-d');
                                     $rejectionReason = $record->status;
                                     return [$regId, $issue, $cost, $appliedBy, $region,$date, $rejectionReason];
@@ -181,7 +181,7 @@
                                         $date = $record->started_at ?? 'N/A';
                                         $cost = $record->actual_cost ? '$' . number_format($record->actual_cost, 2) : 'N/A';
                                         $items = $record->supervisorReports->first()->maintenance_notes ?? '—';
-                                        $location = $record->vehicle->branch->location ?? 'N/A';
+                                        $location = $record->vehicle->branch->district ?? 'N/A';
                                         $status = ucfirst($record->status);
                                         $actions = '';
                                         if ($record->status === 'completed') {
@@ -207,7 +207,7 @@
                     <p><strong>Date:</strong> {{ optional($record->started_at)->format('Y-m-d') ?? 'N/A' }}</p>
                     <p><strong>Status:</strong> {{ ucfirst($record->status) }}</p>
                     <p><strong>Performed By:</strong> {{ $record->supervisorReports->first()->mechanic_info ?? 'N/A' }}</p>
-                    <p><strong>Estimated Cost:</strong> ${{ number_format($record->estimated_cost, 2) }}</p>
+                    <p><strong>Estimated Cost:</strong> ${{ number_format($record->maintenanceRequest->estimated_cost, 2) }}</p>
                     <p><strong>Actual Cost:</strong> ${{ number_format($record->actual_cost, 2) }}</p>
                     <p><strong>Notes:</strong> {{ $record->supervisorReports->first()->maintenance_notes ?? 'N/A' }}</p>
                 </div>

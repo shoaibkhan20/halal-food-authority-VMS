@@ -15,6 +15,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
+
+
 // ====================
 // Authenticated Routes
 // ====================
@@ -26,24 +28,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
     Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
     Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
-    
-    //shared routes
+
+    //vehicle tracking
     Route::middleware('role:super-admin,director-admin,committe-user,district-user')->group(function(){
         Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
     });
-
     Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('vehicle.maintenance');
         Route::get('/reporting', [ReportController::class, 'index'])->name('reports');
         Route::get('/reporting/vehicle-status', [ReportController::class, 'vehicleStatus'])->name('report.vehicle-status');
         Route::get('/reporting/maintenance-report', [ReportController::class, 'MaintenanceReport'])->name('report.maintenance');
     });
-    // committee and director shared routes
+    // maintenance approve / reject
     Route::middleware('role:director-admin,committe-user')->group(function () {
         Route::post('/maintenance/approve/{id}', [MaintenanceController::class, 'approve'])->name('maintenance.approve');
         Route::post('/maintenance/assign/{id}', [MaintenanceController::class, 'assign'])->name('maintenance.assign');
         Route::post('/maintenance/reject/{id}', [MaintenanceController::class, 'reject'])->name('maintenance.reject');
     });
+    // apply for maintenance 
+    Route::middleware('role:district-user,divisional-user')->group(function(){
+        Route::get('/maintenance/apply',[MaintenanceController::class,'MaintenanceApplicationPage'])->name('maintenance.apply');
+    });
+
     // Super Admin
     Route::prefix('super-admin')->middleware('role:super-admin')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('super-admin.dashboard');
@@ -76,6 +82,7 @@ Route::middleware('auth')->group(function () {
     //  District User
     Route::prefix('district-user')->middleware('role:district-user')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('district-user.dashboard');
-
+        Route::get('/vehicles', [VehicleController::class, 'vehiclesByDistrict'])->name('district-user.vehicles');
+        Route::get('/vehicles/tracking', [VehicleController::class, 'districtVehiclesTracking'])->name('district-user.vehicles.tracking');
     });
 });

@@ -21,7 +21,8 @@ class VmsSeeder extends Seeder
         for ($i = 1; $i <= 5; $i++) {
             $branches[] = DB::table('branches')->insertGetId([
                 'name' => 'Branch ' . $i,
-                'location' => $faker->city,
+                'district' => $faker->state,
+                'city' => $faker->city,
                 'address' => $faker->address,
                 'created_at' => now(),
                 'updated_at' => now(),

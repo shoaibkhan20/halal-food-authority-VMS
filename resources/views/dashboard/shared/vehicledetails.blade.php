@@ -15,7 +15,7 @@
                     {{ session('error') }}
                 </div>
             @endif
-            <table class="w-full text-sm">
+            <table class="w-full text-sm min-h-[450px]">
                 <tbody>
                     <tr class="border-b">
                         <td class="py-3 font-semibold w-1/2">Reg. ID</td>
@@ -39,7 +39,7 @@
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Region</td>
-                        <td class="py-3">{{ $vehicle->branch->location }}</td>
+                        <td class="py-3">{{ $vehicle->branch->district }}</td>
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Branch ID</td>
@@ -79,10 +79,10 @@
                 </div>
             @endif
 
-            <a href="{{ route('vehicles.info') }}"
+            <button onclick="window.history.back();"
                 class="cursor-pointer absolute top-4 right-4 text-red-600 text-xl hover:text-red-800">
                 &times;
-            </a>
+            </button>
         </div>
     </div>
 

@@ -97,25 +97,24 @@
         labels: doughnutLabels,
         datasets: [{
         data: doughnutData,
-        backgroundColor: [
-          
-          '#9C27B0', // Green
-          '#2196F3', // Blue
-          '#FF9800', // Orange
-          '#F44336', // Red
-          '#4CAF50', // Purple
-          '#FFEB3B'  // Yellow
+        bbackgroundColor: [
+            '#1B5E20', // Dark Green (primary tone)
+            '#388E3C', // Medium Green
+            '#016630', // Soft Green
+            '#455A64', // Slate Gray
+            '#90A4AE', // Cool Gray
+            '#CFD8DC'  // Light Gray/Off-White
           ],
-      }]
+        }]
       },
       options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
         legend: {
-        position: 'bottom'
+          position: 'bottom'
         }
-      }
+        }
       }
       });
     }

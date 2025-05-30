@@ -176,14 +176,14 @@
             </nav>
         @elseif (Auth::User()->role->role_name == 'district-user')
             <nav class="space-y-4 font-medium w-full px-6">
-                <a href="{{ route('vehicles.info') }}"
-                    class="border-b block py-2 px-4  {{ request()->routeIs('vehicles.info') || request()->routeIs('vehicle.details') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Vehicle
+                <a href="{{ route('district-user.vehicles') }}"
+                    class="border-b block py-2 px-4  {{ request()->routeIs('district-user.vehicles') || request()->routeIs('vehicle.details') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Vehicle
                     Information
                 </a>
-                <a href="{{ route('vehicle.tracking') }}"
-                    class="border-b block py-2 px-4  {{ request()->routeIs('vehicle.tracking') || request()->routeIs('vehicle.liveLocation') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Vehicle
+                <a href="{{ route('district-user.vehicles.tracking') }}"
+                    class="border-b block py-2 px-4  {{ request()->routeIs('district-user.vehicles.tracking') || request()->routeIs('vehicle.liveLocation') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Vehicle
                     Tracking</a>
-
+            
                 <form id="logout-form" class="block">
                     @csrf
                     <button onclick="LoginHandler();"

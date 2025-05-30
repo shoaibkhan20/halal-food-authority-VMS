@@ -12,7 +12,8 @@ class CreateVmsTables extends Migration
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('location')->nullable();
+            $table->string('district')->nullable();
+            $table->string('city')->nullable();
             $table->string('address')->nullable();
             $table->timestamps();
         });

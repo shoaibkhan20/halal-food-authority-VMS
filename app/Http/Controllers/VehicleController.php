@@ -28,13 +28,69 @@ class VehicleController extends Controller
             })
             ->get();
         $noResults = $search && $regIds->isEmpty();
-
         $branches = Branch::all();
         $vehicleTypes = VehicleType::all()->unique();
         $availableVehicles = Vehicle::where('status', 'Available')->get();
         $users = User::all();
 
-        return view('dashboard.shared.vehiclesinfo', compact(
+        if (Auth::user()->role->role_name === 'district-user') {
+            return view('dashboard.district-user.vehicles', compact(
+                'regIds',
+                'branches',
+                'vehicleTypes',
+                'users',
+                'availableVehicles',
+                'noResults'
+            ));
+        } else {
+            return view('dashboard.shared.vehiclesinfo', compact(
+                'regIds',
+                'branches',
+                'vehicleTypes',
+                'users',
+                'availableVehicles',
+                'noResults'
+            ));
+        }
+
+    }
+
+
+
+    public function vehiclesByDistrict(Request $request)
+    {
+        $search = $request->input('search');
+
+        // Get the current user's district via their branch
+        $user = Auth::user();
+        $userDistrict = optional($user->branch)->district;
+
+        // Filter vehicles by the district of the current user
+        $regIds = Vehicle::select('RegID', 'Vehicle_Type')
+            ->whereHas('branch', function ($query) use ($userDistrict) {
+                $query->where('district', $userDistrict);
+            })
+            ->when($search, function ($query, $search) {
+                return $query->where('RegID', 'LIKE', '%' . $search . '%');
+            }, function ($query) {
+                return $query->limit(6);
+            })
+            ->get();
+
+        $noResults = $search && $regIds->isEmpty();
+
+        // You may still want to filter these by district too if relevant
+        $branches = Branch::where('district', $userDistrict)->get();
+        $vehicleTypes = VehicleType::all()->unique();
+        $availableVehicles = Vehicle::where('status', 'Available')
+            ->whereHas('branch', function ($query) use ($userDistrict) {
+                $query->where('district', $userDistrict);
+            })->get();
+        $users = User::whereHas('branch', function ($query) use ($userDistrict) {
+            $query->where('district', $userDistrict);
+        })->get();
+
+        return view('dashboard.district-user.vehicles', compact(
             'regIds',
             'branches',
             'vehicleTypes',
@@ -144,7 +200,22 @@ class VehicleController extends Controller
         return view('dashboard.shared.vehicle-tracking', compact('vehicles'));
     }
 
+    public function districtVehiclesTracking(Request $request)
+    {
+        $user = Auth::user();
+        $userDistrict = optional($user->branch)->district;
 
+        $query = Vehicle::with('latestLocation')
+            ->has('locations')
+            ->whereHas('branch', function ($q) use ($userDistrict) {
+                $q->where('district', $userDistrict);
+            });
+        if ($search = $request->input('search')) {
+            $query->where('RegID', 'LIKE', '%' . $search . '%');
+        }
+        $vehicles = $query->get();
+        return view('dashboard.district-user.tracking', compact('vehicles'));
+    }
 
     public function searchVehicle(Request $request)
     {

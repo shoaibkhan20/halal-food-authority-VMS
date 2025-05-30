@@ -10,7 +10,6 @@ class Vehicle extends Model
     protected $primaryKey = 'RegID';
     public $incrementing = false;
     protected $keyType = 'string';
-
     protected $fillable = [
         'RegID',
         'Model',

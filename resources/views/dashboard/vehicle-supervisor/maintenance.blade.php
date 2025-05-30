@@ -61,55 +61,55 @@
                                         $date = $record->started_at ?? 'N/A';
                                         $cost = $record->actual_cost ? '$' . number_format($record->actual_cost, 2) : 'N/A';
                                         // $items = $record->maintenance_notes ?? '—';
-                                        $location = $record->vehicle->branch->location ?? 'N/A';
+                                        $location = $record->vehicle->branch->district ?? 'N/A';
                                         $status = ucfirst($record->status);
                                         $actions = '';
                                         $actions .= '
-                                                                                                                                <label for="reject-modal-' . $record->id . '" class="btn btn-sm bg-green-800 text-white hover:bg-green-700 transition">Completion Report</label>
+                                                                                                                                <label for="reject-modal-' . $record->id . '" class="btn btn-sm bg-green-800 text-white hover:bg-green-700 transition">Add Report</label>
                                                                                                                             ';
                                         // Modal content
                                         $actions .= '
-                                                                                                                                <input type="checkbox" id="reject-modal-' . $record->id . '" class="modal-toggle" />
-                                                                                                                                <div class="modal">
-                                                                                                                                    <div class="modal-box w-full max-w-lg">
-                                                                                                                                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Reject Maintenance Request</h3>
-                                                                                                                                        <form method="POST" action="' . route('vehicle-maintenance.complete', ['id' => $record->id]) . '" class="space-y-4" enctype="multipart/form-data">
-                                                                                                                                            ' . csrf_field() . '
+                                <input type="checkbox" id="reject-modal-' . $record->id . '" class="modal-toggle" />
+                                <div class="modal">
+                                    <div class="modal-box w-full max-w-lg">
+                                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Reject Maintenance Request</h3>
+                                        <form method="POST" action="' . route('vehicle-maintenance.complete', ['id' => $record->id]) . '" class="space-y-4" enctype="multipart/form-data">
+                                            ' . csrf_field() . '
 
-                                                                                                                                            <!-- Maintenance Notes Input -->
-                                                                                                                                            <div>
-                                                                                                                                                <label for="maintenance_notes" class="block mb-1 font-semibold text-sm text-gray-700">Maintenance Notes</label>
-                                                                                                                                                <textarea  name="maintenance_notes"  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Enter maintenance notes..."></textarea>
-                                                                                                                                            </div>
+                                            <!-- Maintenance Notes Input -->
+                                            <div>
+                                                <label for="maintenance_notes" class="block mb-1 font-semibold text-sm text-gray-700">Maintenance Notes</label>
+                                                <textarea  name="maintenance_notes"  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Enter maintenance notes..."></textarea>
+                                            </div>
 
-                                                                                                                                            <!-- Performed By Input -->
-                                                                                                                                            <div>
-                                                                                                                                                <label for="performed_by" class="block mb-1 font-semibold text-sm text-gray-700">Mechanic info</label>
-                                                                                                                                                <input type="text" name="performed_by"  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Performed By">
-                                                                                                                                            </div>
+                                            <!-- Performed By Input -->
+                                            <div>
+                                                <label for="performed_by" class="block mb-1 font-semibold text-sm text-gray-700">Mechanic info</label>
+                                                <input type="text" name="performed_by"  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Performed By">
+                                            </div>
 
-                                                                                                                                            <!-- File Upload Input -->
-                                                                                                                                            <div>
-                                                                                                                                                <label for="attachment" class="block mb-1 font-semibold text-sm text-gray-700">Attach File</label>
-                                                                                                                                                <input 
-                                                                                                                                                    required
-                                                                                                                                                    type="file" 
-                                                                                                                                                    name="attachment" 
-                                                                                                                                                    id="attachment" 
-                                                                                                                                                    accept=".pdf,.doc,.docx,.xls,.xlsx"
-                                                                                                                                                    class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                                                                                                                                                >
-                                                                                                                                            </div>
+                                            <!-- File Upload Input -->
+                                            <div>
+                                                <label for="attachment" class="block mb-1 font-semibold text-sm text-gray-700">Attach File</label>
+                                                <input 
+                                                    required
+                                                    type="file" 
+                                                    name="attachment" 
+                                                    id="attachment" 
+                                                    accept=".pdf,.doc,.docx,.xls,.xlsx"
+                                                    class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                                                >
+                                            </div>
 
-                                                                                                                                            <!-- Submit/Cancel Buttons -->
-                                                                                                                                            <div class="flex justify-end gap-2 mt-6">
-                                                                                                                                                <button type="submit" class="btn bg-red-800 text-white hover:bg-red-700 transition">Submit</button>
-                                                                                                                                                <label for="reject-modal-' . $record->id . '" class="btn btn-outline">Cancel</label>
-                                                                                                                                            </div>
-                                                                                                                                        </form>
+                                            <!-- Submit/Cancel Buttons -->
+                                            <div class="flex justify-end gap-2 mt-6">
+                                                <button type="submit" class="btn bg-red-800 text-white hover:bg-red-700 transition">Submit</button>
+                                                <label for="reject-modal-' . $record->id . '" class="btn btn-outline">Cancel</label>
+                                            </div>
+                                        </form>
 
 
-                                                                                                                                    </div>
+                                    </div>
                                                                                                                                 </div>';
                                         return [$regId, $date, $cost, $location, $status, $actions];
                                     })->toArray();
@@ -129,7 +129,7 @@
                                         $date = $record->started_at ?? 'N/A';
                                         $cost = $record->actual_cost ? '$' . number_format($record->actual_cost, 2) : 'N/A';
                                         $items = $record->supervisorReports->first()->maintenance_notes ?? '—';
-                                        $location = $record->vehicle->branch->location ?? 'N/A';
+                                        $location = $record->vehicle->branch->district ?? 'N/A';
                                         $status = ucfirst($record->status);
                                         $actions = '';
                                         $report = $record->supervisorReports->first();

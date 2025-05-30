@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Storage;
 class MaintenanceController extends Controller
 {
 
+    // maintenanc application page
+    public function MaintenanceApplicationPage(){
+        return view('dashboard.shared.maintenance-application');
+    }
+
+    // to display maintenance request 
     public function index(Request $request)
     {
         $search = $request->query('search');
@@ -148,7 +154,7 @@ class MaintenanceController extends Controller
 
 
 
-    // request displaying and completion of report [vehicle-supervisor]
+    // request displaying and completion of maintenance report [vehicle-supervisor]
     public function vehicleMaintenance(Request $request)
     {
         $search = $request->query('search');
