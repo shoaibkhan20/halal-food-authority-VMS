@@ -6,10 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Vehicle;
 class VehicleAssignment extends Model
 {
-    protected static function booted()
+    protected static function boot()
     {
-        parent::booted();
-        static::observe(\App\Observers\VehicleAssignmentObserver::class);
+        parent::boot();
+        static::created(function ($assignment) {
+            // Automatically update vehicle status when assigned
+            $vehicle = Vehicle::find($assignment->vehicle_id);
+            if ($vehicle && $vehicle->status !== 'Assigned') {
+                $vehicle->update(['status' => 'Assigned']);
+            }
+        });
+
+        static::deleted(function ($assignment) {
+            // Optional: revert to Available if the assignment is deleted
+            $vehicle = Vehicle::find($assignment->vehicle_id);
+            if ($vehicle) {
+                $vehicle->update(['status' => 'Available']);
+            }
+        });
     }
     protected $fillable = [
         'vehicle_id',

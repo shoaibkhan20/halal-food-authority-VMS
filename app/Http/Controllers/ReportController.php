@@ -29,7 +29,7 @@ class ReportController extends Controller
                 'RegID' => $vehicle->RegID,
                 'Model' => $vehicle->Model,
                 'AssignedTo' => $vehicle->latestAssignment->user->name ?? 'Unassigned',
-                'Status' => $vehicle->status,
+                'Status' => $vehicle->latestAssignment ? 'Assigned' : 'Availible',
                 'Location' => $vehicle->branch->district ?? 'Unknown',
             ];
         });

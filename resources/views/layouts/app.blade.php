@@ -12,11 +12,12 @@
 </head>
 
 <body class="flex min-h-screen bg-gray-100">
-
+    <div class="md:hidden fixed top-5 left-5 px-3 py-2 bg-green-500 z-10 cursor-pointer" onclick="toggleMenu();">
+        Menu
+    </div>
     <!-- Sidebar -->
-    <aside class="sticky left-0 top-0 w-64 h-screen bg-green-900 text-white flex flex-col items-center py-6">
+    <aside id="menu" class="hidden md:flex sticky left-0 top-0 w-64 h-screen bg-green-900 text-white  flex-col items-center py-6">
         <a href="{{ route('home') }}"> <img src="{{ asset('images/logo.png') }}" class="h-20 mb-6" alt="Logo"></a>
-
         @if(Auth::User()->role->role_name == 'super-admin')
             <nav class="space-y-4 font-medium w-full px-6">
                 <a href="{{ route('vehicles.info') }}"
@@ -35,7 +36,6 @@
                 @php
                     $isReportOpen = request()->routeIs('report.vehicle-status') || request()->routeIs('report.maintenance') || request()->routeIs('reports');
                 @endphp
-
                 <div class="w-full ">
                     <a href="{{ route('reports') }}"
                         class="cursor-pointer border-b w-full text-left py-2 px-4  font-medium flex justify-between items-center {{ $isReportOpen ? 'bg-white text-green-800 hover:bg-white' : 'hover:bg-green-800 ' }}">
@@ -65,9 +65,7 @@
                     </button>
                 </form>
             </nav>
-
         @elseif (Auth::User()->role->role_name == 'director-admin')
-
             <nav class="space-y-4 font-medium w-full px-6">
                 <a href="{{ route('vehicles.info') }}"
                     class="border-b block py-2 px-4  {{ request()->routeIs('vehicles.info') || request()->routeIs('vehicle.details') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Vehicle
@@ -110,7 +108,6 @@
                     </button>
                 </form>
             </nav>
-
         @elseif (Auth::User()->role->role_name == 'committe-user')
 
             <nav class="space-y-4 font-medium w-full px-6">
@@ -234,6 +231,11 @@
         form.method = 'POST';
         form.action = '{{ route('logout') }}';
         form.submit();
+    }
+    
+    function toggleMenu(){
+        const menu = document.getElementById('menu');
+        menu.classList.toggle('hidden');
     }
 </script>
 <!-- Inject page-specific scripts -->

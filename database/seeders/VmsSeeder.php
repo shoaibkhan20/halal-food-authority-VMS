@@ -11,6 +11,7 @@ use App\Models\MaintenanceRequest;
 use App\Models\VehicleMaintenance;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\VehicleAssignment;
 class VmsSeeder extends Seeder
 {
     public function run(): void
@@ -71,13 +72,11 @@ class VmsSeeder extends Seeder
 
         // 4. Vehicle Assignments
         for ($i = 1; $i <= 8; $i++) {
-            DB::table('vehicle_assignments')->insert([
+            VehicleAssignment::create([
                 'vehicle_id' => $faker->randomElement($vehicleIds),
                 'user_id' => $faker->randomElement($users),
-                'assigned_date' => $faker->date,
-                'returned_date' => $faker->optional()->date,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'assigned_date' => $faker->date(),
+                'returned_date' => $faker->optional()->date(),
             ]);
         }
 

@@ -17,7 +17,7 @@
                                 id="filterSearch" 
                                 name="search" 
                                 placeholder="Search Reg.id" 
-                                class="border border-gray-300 rounded px-4 py-2 w-full pr-8" 
+                                class="border border-gray-300 rounded px-4 py-1 w-full pr-8" 
                                 value="{{ request('search') }}"
                             >
 
@@ -34,7 +34,7 @@
 
 
                     <div class="mb-6">
-                        <select class="border border-gray-300 rounded px-4 py-2">
+                        <select class="border border-gray-300 rounded px-4 py-1">
                             <option>Last Month</option>
                             <option>Last 3 Months</option>
                             <option>All Time</option>
@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="tabs tabs-lift">
-                    <input type="radio" name="my_tabs_3" class="tab" aria-label="Pending Requests" checked="checked" />
+                    <input type="radio" name="my_tabs_3" class="tab " aria-label="Pending Requests" checked="checked" />
 
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         @if (session('success'))

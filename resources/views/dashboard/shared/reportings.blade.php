@@ -15,7 +15,7 @@
                                 id="filterSearch" 
                                 name="search" 
                                 placeholder="Search Reg.id" 
-                                class="border border-gray-300 rounded px-4 py-2 w-full pr-8" 
+                                class="border border-gray-300 rounded px-4 py-1 w-full pr-8" 
                                 value="{{ request('search') }}"
                             >
                             @if(request('search'))
@@ -30,7 +30,7 @@
                     </div>
 
                 <div class="mb-6">
-                    <select class="border border-gray-300 rounded px-4 py-2">
+                    <select class="border border-gray-300 rounded px-4 py-1">
                         <option>Last Month</option>
                         <option>Last 3 Months</option>
                         <option>All Time</option>

@@ -15,7 +15,7 @@
                                 id="filterSearch" 
                                 name="search" 
                                 placeholder="Search id or Name " 
-                                class="border border-gray-300 rounded px-4 py-2 w-full pr-8" 
+                                class="border border-gray-300 rounded px-4 py-1 w-full pr-8" 
                                 value="{{ request('search') }}"
                             >
 
@@ -31,7 +31,7 @@
                     </div>
                     <div class="mb-6">
                         <button onclick="my_modal_3.showModal()"
-                            class="cursor-pointer bg-green-800 text-white px-4 py-2 rounded">
+                            class="cursor-pointer bg-green-800 text-white px-4 py-1 rounded">
                             Add User
                         </button>
                     </div>

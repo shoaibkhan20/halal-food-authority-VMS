@@ -102,34 +102,26 @@ class CreateVmsTables extends Migration
             $table->date('trip_date');
             $table->timestamps();
         });
-
         // 9. Maintenance Requests Table
         Schema::create('maintenance_requests', function (Blueprint $table) {
             $table->id();
-
             $table->string('vehicle_id');
             $table->foreign('vehicle_id')->references('RegID')->on('vehicles')->onDelete('cascade');
-
             $table->foreignId('applied_by')->nullable()->constrained('users')->onDelete('set null');
-
             // Status Tracking
             $table->enum('status', ['pending', 'under_committee_review', 'committee_approved', 'committee_rejected', 'final_approved', 'final_rejected'])->default('pending');
-
             // Director's Initial Review
             $table->enum('director_status', ['pending', 'approved', 'rejected', 'waiting_for_committee'])->default('pending');
             $table->foreignId('director_reviewed_by')->nullable()->constrained('users')->onDelete('set null');
             $table->text('director_rejection_message')->nullable();
-
             // Committee Review
             $table->enum('committee_status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('committee_reviewed_by')->nullable()->constrained('users')->onDelete('set null');
             $table->text('committee_rejection_message')->nullable();
-
             // Director Final Approval (after committee approval)
             $table->enum('director_final_status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('director_final_approved_by')->nullable()->constrained('users')->onDelete('set null');
             $table->text('director_final_rejection_message')->nullable();
-
             $table->string('issue');
             $table->decimal('estimated_cost', 10, 2)->nullable();
             $table->timestamps();
