@@ -100,11 +100,9 @@ class VehicleController extends Controller
     public function vehiclesByDivision(Request $request)
     {
         $search = $request->input('search');
-
         // Get the current user's division via their branch
         $user = Auth::user();
         $userDivision = optional($user->branch)->division;
-
         // Filter vehicles by the division of the current user
         $regIds = Vehicle::select('RegID', 'Vehicle_Type')
             ->whereHas('branch', function ($query) use ($userDivision) {
@@ -116,16 +114,13 @@ class VehicleController extends Controller
                 return $query->limit(6);
             })
             ->get();
-
         $noResults = $search && $regIds->isEmpty();
-
         $branches = Branch::where('division', $userDivision)->get();
         $vehicleTypes = VehicleType::all()->unique();
         $availableVehicles = Vehicle::where('status', 'Available')
             ->whereHas('branch', function ($query) use ($userDivision) {
                 $query->where('division', $userDivision);
             })->get();
-
         $users = User::whereHas('branch', function ($query) use ($userDivision) {
             $query->where('division', $userDivision);
         })->get();
@@ -139,7 +134,6 @@ class VehicleController extends Controller
             'noResults'
         ));
     }
-
 
     public function store(Request $request)
     {
@@ -161,19 +155,41 @@ class VehicleController extends Controller
             'vehicle_id' => 'required|exists:vehicles,RegID',
             'user_id' => 'required|exists:users,id',
         ]);
-        //  End any existing active assignment for this vehicle
+        // End any existing active assignment for this vehicle
         VehicleAssignment::where('vehicle_id', $request->vehicle_id)
             ->whereNull('returned_date')
             ->update(['returned_date' => now()]);
-
+        // Create new assignment
         VehicleAssignment::create([
             'vehicle_id' => $request->vehicle_id,
             'user_id' => $request->user_id,
             'assigned_date' => now(),
-            'returned_date' => null, // Not yet returned
+            'returned_date' => null,
         ]);
+        
+        // Update vehicle status to 'Assigned'
         return redirect()->back()->with('success', 'Vehicle reassigned successfully.');
     }
+
+
+    public function deallocateVehicle(Request $request, $regid)
+    {
+        // End the active assignment
+        VehicleAssignment::where('vehicle_id', $regid)
+            ->whereNull('returned_date')
+            ->update(['returned_date' => now()]);
+        // Check if there are any active assignments left for this vehicle
+        $hasActiveAssignment = VehicleAssignment::where('vehicle_id', $regid)
+            ->whereNull('returned_date')
+            ->exists();
+        // If no active assignments, set vehicle status to 'Available'
+        if (!$hasActiveAssignment) {
+            Vehicle::where('RegID', $regid)->update(['status' => 'Available']);
+        }
+
+        return redirect()->back()->with('success', 'Vehicle deallocated successfully.');
+    }
+
 
     public function details($regid)
     {
@@ -223,17 +239,14 @@ class VehicleController extends Controller
     }
 
 
-
     public function tracking(Request $request)
     {
         // Start the query to get vehicles with their latest location
         $query = Vehicle::with('latestLocation')->has('locations');
-
         // If search query is provided, filter based on RegID
         if ($search = $request->input('search')) {
             $query->where('RegID', 'LIKE', '%' . $search . '%');
         }
-
         // Fetch the filtered vehicles
         $vehicles = $query->get();
         // Return the filtered results to the vie

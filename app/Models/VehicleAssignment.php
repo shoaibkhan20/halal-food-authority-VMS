@@ -10,21 +10,32 @@ class VehicleAssignment extends Model
     {
         parent::boot();
         static::created(function ($assignment) {
-            // Automatically update vehicle status when assigned
-            $vehicle = Vehicle::find($assignment->vehicle_id);
-            if ($vehicle && $vehicle->status !== 'Assigned') {
-                $vehicle->update(['status' => 'Assigned']);
-            }
+            self::syncVehicleStatus($assignment->vehicle_id);
         });
-
+        static::updated(function ($assignment) {
+            self::syncVehicleStatus($assignment->vehicle_id);
+        });
         static::deleted(function ($assignment) {
-            // Optional: revert to Available if the assignment is deleted
-            $vehicle = Vehicle::find($assignment->vehicle_id);
-            if ($vehicle) {
-                $vehicle->update(['status' => 'Available']);
-            }
+            self::syncVehicleStatus($assignment->vehicle_id);
         });
     }
+
+    protected static function syncVehicleStatus($vehicleId)
+    {
+        $vehicle = Vehicle::find($vehicleId);
+        if (!$vehicle)
+            return;
+        // Get latest assignment
+        $latestAssignment = $vehicle->assignments()
+            ->orderByDesc('assigned_date') // or 'created_at'
+            ->first();
+        if (!$latestAssignment || $latestAssignment->returned_date) {
+            $vehicle->update(['status' => 'Available']);
+        } else {
+            $vehicle->update(['status' => 'Assigned']);
+        }
+    }
+
     protected $fillable = [
         'vehicle_id',
         'user_id',

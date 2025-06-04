@@ -18,7 +18,6 @@
                             <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
                         </button>
                     @endforeach
-
                 </div>
                 <button onclick="window.history.back()"
                     class="cursor-pointer absolute top-4 right-4 text-red-600 text-xl hover:text-red-800">
@@ -52,7 +51,8 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         @foreach($vehicles->take(6) as $vehicle)
                             <button
-                                onclick="showLiveLocationModal({{ $vehicle->latestLocation->latitude }}, {{ $vehicle->latestLocation->longitude }}, {{ $vehicle->latestLocation->speed }})"
+                               onclick="showLiveLocationModal('{{ $vehicle->RegID }}', '{{ $vehicle->latestLocation->latitude }}', '{{ $vehicle->latestLocation->longitude }}', '{{ $vehicle->latestLocation->speed }}')"
+
                                 class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
                                 @if ($vehicle->Vehicle_Type === 'Mobile_lab')
                                     <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
@@ -75,7 +75,6 @@
         <div class="modal-box" style="width: 800px; height: 550px; max-width: none;">
             <!-- Map Section -->
             <div id="map" class="w-full rounded" style="height: 350px;"></div>
-
             <!-- Bottom Section: Info Table -->
             <div class="" style="height: 150px;">
                 <table class="table table-zebra w-full text-sm">
@@ -100,38 +99,78 @@
 
     <!-- Google Maps API Script (replace YOUR_API_KEY) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATGxyJb74dBUuIy5ibEOUdqJgcfU71jQI"></script>
+
     <script>
         let map;
         let marker;
+        let liveInterval = null;
+
+        // Initialize map and marker
         function initMap(lat, lng) {
             const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
-            if (!map) {
-                map = new google.maps.Map(document.getElementById("map"), {
-                    zoom: 15,
-                    center: position,
-                });
-                marker = new google.maps.Marker({
-                    position: position,
-                    map: map,
-                });
-            } else {
-                map.setCenter(position);
-                marker.setPosition(position);
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: position,
+            });
+            marker = new google.maps.Marker({
+                position: position,
+                map: map,
+            });
+        }
+
+        // Update marker without recreating map
+        function updateMap(lat, lng) {
+            const newPos = { lat: parseFloat(lat), lng: parseFloat(lng) };
+            if (marker) {
+                marker.setPosition(newPos);
+                map.setCenter(newPos);
             }
         }
-        // Call this function dynamically when opening modal
-        function showLiveLocationModal(lat, lng, speed) {
+
+        // Fetch latest location
+        async function fetchLiveLocation(vehicleId) {
+            console.log(vehicleId)
+            try {
+                const res = await fetch(`/api/vehicle/${vehicleId}/location`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    return data.data;
+                }
+            } catch (err) {
+                console.error('Error fetching location:', err);
+            }
+        }
+
+        // Open modal and start real-time tracking
+        function showLiveLocationModal(vehicleId, lat, lng, speed) {
+            // Display initial values
             document.getElementById("lat").textContent = lat;
             document.getElementById("lng").textContent = lng;
             document.getElementById("speed").textContent = speed;
             initMap(lat, lng);
-            // Show modal
+
             const modal = document.getElementById("my_modal_3");
             modal.classList.remove('hidden');
             if (modal.showModal) {
                 modal.showModal();
-            };
+            }
+
+            // Clear any previous interval
+            if (liveInterval) clearInterval(liveInterval);
+
+            // Start polling every 2 seconds
+            liveInterval = setInterval(async () => {
+                const data = await fetchLiveLocation(vehicleId);
+                if (data) {
+                    document.getElementById("lat").textContent = data.latitude;
+                    document.getElementById("lng").textContent = data.longitude;
+                    document.getElementById("speed").textContent = data.speed;
+                    updateMap(data.latitude, data.longitude);
+                }
+            }, 2000);
         }
+
+        // Handle modal close on outside click
         const modal = document.getElementById('my_modal_3');
         modal.addEventListener('click', function (event) {
             const rect = modal.querySelector('.modal-box').getBoundingClientRect();
@@ -142,21 +181,20 @@
                 event.clientY <= rect.bottom
             );
             if (!isInDialog) {
-                modal.close(); // Close modal on outside click
+                modal.close(); // Close modal
                 modal.classList.add('hidden');
+                if (liveInterval) {
+                    clearInterval(liveInterval);
+                    liveInterval = null;
+                }
             }
         });
-
-
-
-        //
         const searchInput = document.getElementById('searchInput');
         const searchDropdown = document.getElementById('searchDropdown');
         function filterSearchDropdown() {
             const filter = searchInput.value.toLowerCase();
             const items = searchDropdown.querySelectorAll('li');
             let anyVisible = false;
-
             items.forEach(item => {
                 const text = item.textContent.toLowerCase();
                 const visible = text.includes(filter);

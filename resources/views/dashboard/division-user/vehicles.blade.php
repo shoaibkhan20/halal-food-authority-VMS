@@ -32,13 +32,11 @@
         <div class="w-full min-h-screen grid place-items-center">
             <div class="w-full h-full grid place-items-center rounded-lg bg-white">
                 <div class="min-h-[450px]">
-                        <p>{{Auth::user()->branch->division}}</p>
-
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-3xl font-bold">Vehicle Information</h1>
                     </div>
                     <div class="mb-6 relative w-full">
-                        <form action="{{ route('district-user.vehicles') }}" method="GET">
+                        <form action="{{ route('divisional-user.vehicles') }}" method="GET">
                             <input id="searchInput" name="search" type="text" autocomplete="off" placeholder="Search Reg.id"
                                 class="w-full border border-gray-300 rounded px-4 py-2" oninput="filterSearchDropdown()">
                             <ul id="searchDropdown"

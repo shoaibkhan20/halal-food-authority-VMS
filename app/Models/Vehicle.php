@@ -36,7 +36,7 @@ class Vehicle extends Model
     }
     public function assignments()
     {
-        return $this->hasMany(VehicleAssignment::class, 'vehicle_id');
+        return $this->hasMany(VehicleAssignment::class, 'vehicle_id','RegID');
     }
     public function latestAssignment()
     {
@@ -45,11 +45,11 @@ class Vehicle extends Model
 
     public function locations()
     {
-        return $this->hasMany(Location::class, 'vehicle_id');
+        return $this->hasMany(Location::class, 'vehicle_id', 'RegID');
     }
-    public function latestLocation()
+     public function latestLocation()
     {
-        return $this->hasOne(Location::class, 'vehicle_id')->latestOfMany();
+        return $this->hasOne(Location::class, 'vehicle_id', 'RegID')->orderByDesc('timestamp');
     }
 
     public function fuelRequests()

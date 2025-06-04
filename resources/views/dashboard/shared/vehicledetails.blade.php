@@ -50,7 +50,7 @@
                         <td class="py-3 capitalize">{{ $status }}</td>
                     </tr>
 
-                    @if ($status === 'assigned' && $assignment)
+                    @if ($status === 'assigned' && $assignment->returned_date == NULL)
                         <tr class="border-b">
                             <td class="py-3 font-semibold">Assigned To</td>
                             <td class="py-3">{{ $assignment->user->name }}</td>
@@ -69,6 +69,16 @@
 
             @if(Auth::user()->role->role_name === 'super-admin')
                 <div class="flex justify-end mt-6 gap-3">
+                    @if ($status === 'assigned' && $assignment)
+                    <form action="{{ route('vehicle.deallocate', $vehicle->RegID) }}" method="POST"
+                        onsubmit="return confirm('Are you sure you want to end  this vehicle?');" style="display:inline;">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit" class=" text-green-800 border-2 border-green-800 px-4 py-2 rounded hover:bg-green-800 hover:text-white">
+                            End Assignment
+                        </button>
+                    </form>
+                    @endif
                     <button onclick='openEditVehicleModal(`{!! addslashes(json_encode($vehicle)) !!}`)'
                         class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700">
                         Edit
@@ -81,6 +91,7 @@
                             Delete
                         </button>
                     </form>
+                    
 
                 </div>
             @endif

@@ -10,14 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 class MaintenanceController extends Controller
 {
-
-    // maintenanc application page
-    public function MaintenanceApplicationPage(){
-        return view('dashboard.shared.maintenance-application');
-    }
-
     // to display maintenance request 
-    public function index(Request $request)
+   public function index(Request $request)
     {
         $search = $request->query('search');
         // Base query for maintenance history
@@ -60,6 +54,60 @@ class MaintenanceController extends Controller
             return view('dashboard.shared.maintenance-history', compact('maintenanceHistory', 'pendingRequests', 'search'));
         }
     }
+
+
+    // division based maintenance requests
+    public function DivisionMaintenances(Request $request)
+    {
+        $search = $request->query('search');
+
+        // Get the current user's division
+        $userDivision = Auth::user()->branch->division;
+
+        // Base query for maintenance history
+        $maintenanceHistoryQuery = VehicleMaintenance::with('vehicle.branch', 'supervisorReports')
+            ->whereHas('vehicle.branch', function ($q) use ($userDivision) {
+                $q->where('division', $userDivision);
+            });
+        if ($search) {
+            $maintenanceHistoryQuery->where(function ($query) use ($search) {
+                $query->whereHas('vehicle', function ($q) use ($search) {
+                    $q->where('RegID', 'like', '%' . $search . '%');
+                })
+                    ->orWhereDate('created_at', $search)
+                    ->orWhereDate('updated_at', $search);
+            });
+        }
+        $maintenanceHistory = $maintenanceHistoryQuery->get();
+        // Base query for pending maintenance requests
+        $pendingRequestsQuery = MaintenanceRequest::with('vehicle.branch', 'appliedBy', 'directorReviewer', 'committeeReviewer', 'finalDirectorApprover')
+            ->whereIn('status', [
+                'pending',
+                'under_committee_review',
+                'committee_approved',
+                'committee_rejected',
+                'final_approved',
+                'final_rejected'
+            ])
+            ->whereHas('vehicle.branch', function ($q) use ($userDivision) {
+                $q->where('division', $userDivision);
+            });
+
+        if ($search) {
+            $pendingRequestsQuery->where(function ($query) use ($search) {
+                $query->whereHas('vehicle', function ($q) use ($search) {
+                    $q->where('RegID', 'like', '%' . $search . '%');
+                })
+                    ->orWhere('issue', 'like', '%' . $search . '%')
+                    ->orWhereHas('appliedBy', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+        $pendingRequests = $pendingRequestsQuery->get();
+        return view('dashboard.committe-user.maintenance', compact('maintenanceHistory', 'pendingRequests', 'search'));
+    }
+
 
     // request approve & rejection [committee & director]
     public function approve(Request $request, $id)
@@ -176,7 +224,7 @@ class MaintenanceController extends Controller
     }
 
 
-    
+
 
 
 }

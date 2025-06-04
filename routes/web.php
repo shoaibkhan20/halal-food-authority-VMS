@@ -16,7 +16,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
 
-
 // ====================
 // Authenticated Routes
 // ====================
@@ -25,10 +24,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
     Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
-    Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
+    // Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
 
+    
+     //vehicle info
+    Route::middleware('role:super-admin,director-admin,committe-user,vehicle-supervisor')->group(function(){
+        Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
+    });
     //vehicle tracking
     Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function(){
         Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
@@ -37,7 +40,7 @@ Route::middleware('auth')->group(function () {
      Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('vehicle.maintenance');
     });
-    Route::middleware('role:super-admin,director-admin,committe-user')->group(function () {
+    Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function () {
         Route::get('/reporting', [ReportController::class, 'index'])->name('reports');
         Route::get('/reporting/vehicle-status', [ReportController::class, 'vehicleStatus'])->name('report.vehicle-status');
         Route::get('/reporting/maintenance-report', [ReportController::class, 'MaintenanceReport'])->name('report.maintenance');
@@ -48,10 +51,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/maintenance/assign/{id}', [MaintenanceController::class, 'assign'])->name('maintenance.assign');
         Route::post('/maintenance/reject/{id}', [MaintenanceController::class, 'reject'])->name('maintenance.reject');
     });
-    // apply for maintenance 
-    Route::middleware('role:district-user,divisional-user')->group(function(){
-        Route::get('/maintenance/apply',[MaintenanceController::class,'MaintenanceApplicationPage'])->name('maintenance.apply');
-    });
 
     // Super Admin
     Route::prefix('super-admin')->middleware('role:super-admin')->group(function () {
@@ -59,6 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/vehicles', [VehicleController::class, 'store'])->name('vehicles.store');
         Route::put('/vehicles/{regid}', [VehicleController::class, 'update'])->name('vehicles.update');
         Route::post('/vehicles/assign', [VehicleController::class, 'assignVehicle'])->name('vehicle.assign');
+        Route::PUT('/vehicles/deallocate/{regid}', [VehicleController::class, 'deallocateVehicle'])->name('vehicle.deallocate');
         Route::get('/role-management', [UserController::class, 'index'])->name('users.role-management');
         Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
@@ -84,8 +84,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('divisional-user.dashboard');
         Route::get('/vehicles', [VehicleController::class, 'vehiclesByDivision'])->name('divisional-user.vehicles');
         Route::get('/vehicles/tracking', [VehicleController::class, 'divisionVehiclesTracking'])->name('divisional-user.vehicles.tracking');
-
-
     });
     //  District User
     Route::prefix('district-user')->middleware('role:district-user')->group(function () {

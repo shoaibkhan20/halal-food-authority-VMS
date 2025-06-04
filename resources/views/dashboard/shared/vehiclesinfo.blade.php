@@ -77,7 +77,6 @@
                                 @endforeach
                             </ul>
                         </form>
-
                     </div>
                     {{-- vehicle info boxes --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -102,9 +101,7 @@
                 <form method="dialog">
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
-
                 <h3 class="text-2xl font-semibold mb-4 text-center">Add New Vehicle</h3>
-
                 <form method="POST" action="{{ route('vehicles.store') }}" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-2 gap-4">

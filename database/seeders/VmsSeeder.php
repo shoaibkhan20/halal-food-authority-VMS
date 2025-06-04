@@ -90,10 +90,8 @@ class VmsSeeder extends Seeder
                 'vehicle_id' => $faker->randomElement($vehicleIds),
                 'user_id' => $faker->randomElement($users),
                 'assigned_date' => $faker->date(),
-                'returned_date' => $faker->optional()->date(),
             ]);
         }
-
         // 5. Locations
         for ($i = 1; $i <= 20; $i++) {
             DB::table('locations')->insert([

@@ -14,16 +14,13 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search');
-
         $vehiclesQuery = Vehicle::with(['currentAssignment.user', 'branch']);
-
         if ($search) {
             $vehiclesQuery->where(function ($query) use ($search) {
                 $query->where('RegID', 'like', '%' . $search . '%')
                     ->orWhere('Model', 'like', '%' . $search . '%');
             });
         }
-
         $vehicles = $vehiclesQuery->get()->map(function ($vehicle) {
             return [
                 'RegID' => $vehicle->RegID,
@@ -38,20 +35,16 @@ class ReportController extends Controller
     }
 
 
-
     public function vehicleStatus(Request $request)
     {
         $search = $request->query('search');
-
         $vehiclesQuery = Vehicle::with(['assignments.user', 'maintenanceRecords', 'branch']);
-
         if ($search) {
             $vehiclesQuery->where(function ($query) use ($search) {
                 $query->where('RegID', 'like', '%' . $search . '%')
                     ->orWhere('Model', 'like', '%' . $search . '%');
             });
         }
-
         $vehicles = $vehiclesQuery->get()->map(function ($vehicle) {
             // Get the current assignment where returned_date is null
             $currentAssignment = $vehicle->assignments->firstWhere('returned_date', null);
@@ -64,7 +57,6 @@ class ReportController extends Controller
                 'under_maintenance' => $vehicle->maintenanceRecords->where('status', 'in_progress')->isNotEmpty(),
             ];
         });
-
         return view("dashboard.shared.vehicle-status-report", compact("vehicles"));
     }
 
@@ -73,31 +65,30 @@ class ReportController extends Controller
     {
         $regId = $request->query('reg_id');
         $date = $request->query('date');
-        $query = VehicleMaintenance::with(['vehicle.branch'])
-            ->whereNotNull('completed_at');
+
+        // Build query with eager loading
+        $query = VehicleMaintenance::with([
+            'vehicle.branch',         // Vehicle and its branch (for location)
+            'supervisorReports' // Supervisor details through reports
+        ])->whereNotNull('completed_at'); // Only completed maintenances
+
+        // Optional filtering by RegID
         if ($regId) {
             $query->whereHas('vehicle', function ($q) use ($regId) {
                 $q->where('RegID', 'like', '%' . $regId . '%');
             });
         }
+
+        // Optional filtering by completed date
         if ($date) {
-            // Ensure we filter on exact date (no time)
             $query->whereDate('completed_at', $date);
         }
-        $records = $query->orderByDesc('completed_at')
-            ->get()
-            ->map(function ($record) {
-                return [
-                    'RegID' => $record->vehicle->RegID ?? 'N/A',
-                    'Date' => $record->completed_at ? Carbon::parse($record->completed_at)->format('Y-m-d') : 'N/A',
-                    'Cost' => number_format($record->actual_cost, 2),
-                    'Items' => $record->supervisorReports()->first()->maintenance_notes ?? 'N/A',
-                    'PerformedBy' => $record->supervisorReports->first()->supervisor->name ?? 'N/A',
-                    'Location' => $record->vehicle->branch->district ?? 'N/A',
-                ];
-            });
 
-        return view("dashboard.shared.maintenance-report", compact("records"));
+        // Get full record (no mapping here)
+        $records = $query->orderByDesc('completed_at')->get();
+
+        // Return to view with raw data
+        return view('dashboard.shared.maintenance-report', compact('records'));
     }
 
 
