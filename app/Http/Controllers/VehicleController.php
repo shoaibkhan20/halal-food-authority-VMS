@@ -16,7 +16,7 @@ use App\Models\VehicleAssignment;
 
 class VehicleController extends Controller
 {
-    //
+
     public function vehicles(Request $request)
     {
         $search = $request->input('search');
@@ -55,12 +55,9 @@ class VehicleController extends Controller
 
     }
 
-
-
     public function vehiclesByDistrict(Request $request)
     {
         $search = $request->input('search');
-
         // Get the current user's district via their branch
         $user = Auth::user();
         $userDistrict = optional($user->branch)->district;
@@ -100,6 +97,49 @@ class VehicleController extends Controller
         ));
     }
 
+    public function vehiclesByDivision(Request $request)
+    {
+        $search = $request->input('search');
+
+        // Get the current user's division via their branch
+        $user = Auth::user();
+        $userDivision = optional($user->branch)->division;
+
+        // Filter vehicles by the division of the current user
+        $regIds = Vehicle::select('RegID', 'Vehicle_Type')
+            ->whereHas('branch', function ($query) use ($userDivision) {
+                $query->where('division', $userDivision);
+            })
+            ->when($search, function ($query, $search) {
+                return $query->where('RegID', 'LIKE', '%' . $search . '%');
+            }, function ($query) {
+                return $query->limit(6);
+            })
+            ->get();
+
+        $noResults = $search && $regIds->isEmpty();
+
+        $branches = Branch::where('division', $userDivision)->get();
+        $vehicleTypes = VehicleType::all()->unique();
+        $availableVehicles = Vehicle::where('status', 'Available')
+            ->whereHas('branch', function ($query) use ($userDivision) {
+                $query->where('division', $userDivision);
+            })->get();
+
+        $users = User::whereHas('branch', function ($query) use ($userDivision) {
+            $query->where('division', $userDivision);
+        })->get();
+
+        return view('dashboard.division-user.vehicles', compact(
+            'regIds',
+            'branches',
+            'vehicleTypes',
+            'users',
+            'availableVehicles',
+            'noResults'
+        ));
+    }
+
 
     public function store(Request $request)
     {
@@ -111,9 +151,7 @@ class VehicleController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
             'Average_mileage' => 'nullable|numeric',
         ]);
-
         Vehicle::create($validated);
-
         return redirect()->back()->with('success', 'Vehicle added successfully!');
     }
 
@@ -123,6 +161,10 @@ class VehicleController extends Controller
             'vehicle_id' => 'required|exists:vehicles,RegID',
             'user_id' => 'required|exists:users,id',
         ]);
+        //  End any existing active assignment for this vehicle
+        VehicleAssignment::where('vehicle_id', $request->vehicle_id)
+            ->whereNull('returned_date')
+            ->update(['returned_date' => now()]);
 
         VehicleAssignment::create([
             'vehicle_id' => $request->vehicle_id,
@@ -130,10 +172,8 @@ class VehicleController extends Controller
             'assigned_date' => now(),
             'returned_date' => null, // Not yet returned
         ]);
-
-        return redirect()->back()->with('success', 'Vehicle assigned successfully.');
+        return redirect()->back()->with('success', 'Vehicle reassigned successfully.');
     }
-
 
     public function details($regid)
     {
@@ -217,10 +257,52 @@ class VehicleController extends Controller
         return view('dashboard.district-user.tracking', compact('vehicles'));
     }
 
+
+    public function divisionVehiclesTracking(Request $request)
+    {
+        $user = Auth::user();
+        $userDivision = optional($user->branch)->division;
+
+        $query = Vehicle::with('latestLocation')
+            ->has('locations')
+            ->whereHas('branch', function ($q) use ($userDivision) {
+                $q->where('division', $userDivision);
+            });
+
+        if ($search = $request->input('search')) {
+            $query->where('RegID', 'LIKE', '%' . $search . '%');
+        }
+
+        $vehicles = $query->get();
+
+        return view('dashboard.division-user.tracking', compact('vehicles'));
+    }
+
     public function searchVehicle(Request $request)
     {
         $search = $request->input('search');
         $vehicles = Vehicle::where('RegID', 'like', '%' . $search . '%')->get();
         return view('dashboard.shared.vehicleSearch', compact('vehicles'));
     }
+
+    public function destroy($id)
+    {
+        $vehicle = Vehicle::find($id);
+
+        if (!$vehicle) {
+            return redirect()->back()->with('error', 'Vehicle not found.');
+        }
+
+        // ✅ End all active assignments by setting returned_date
+        VehicleAssignment::where('vehicle_id', $vehicle->RegID)
+            ->whereNull('returned_date')
+            ->update(['returned_date' => now()]);
+
+        // ✅ Soft-delete the vehicle
+        $vehicle->delete();
+
+        return redirect()->route('vehicles.info')->with('success', 'Vehicle deleted and active assignment(s) ended.');
+    }
+
+
 }

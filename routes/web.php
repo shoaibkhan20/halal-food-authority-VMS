@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/delete-user/{user}', [UserController::class, 'destroy'])->name('users.delete');
+        Route::delete('/delete-vehicle/{id}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
     });
     //  Director Admin
     Route::prefix('director-admin')->middleware('role:director-admin')->group(function () {
@@ -81,6 +82,10 @@ Route::middleware('auth')->group(function () {
     //  Divisional User
     Route::prefix('divisional-user')->middleware('role:divisional-user')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('divisional-user.dashboard');
+        Route::get('/vehicles', [VehicleController::class, 'vehiclesByDivision'])->name('divisional-user.vehicles');
+        Route::get('/vehicles/tracking', [VehicleController::class, 'divisionVehiclesTracking'])->name('divisional-user.vehicles.tracking');
+
+
     });
     //  District User
     Route::prefix('district-user')->middleware('role:district-user')->group(function () {

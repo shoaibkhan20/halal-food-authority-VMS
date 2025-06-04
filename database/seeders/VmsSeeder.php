@@ -16,19 +16,33 @@ class VmsSeeder extends Seeder
 {
     public function run(): void
     {
+
         $faker = Faker::create();
-        // 1. Branches
+
+        $divisionDistricts = [
+            'Punjab' => ['Lahore', 'Faisalabad', 'Rawalpindi', 'Multan'],
+            'Peshawar' => ['Peshawar', 'Mardan', 'Charsadda', 'Nowshera'],
+            'Sindh' => ['Karachi', 'Hyderabad', 'Sukkur', 'Larkana'],
+            'Balochistan' => ['Quetta', 'Sibi', 'Gwadar', 'Turbat'],
+            'Khyber Pakhtunkhwa' => ['Abbottabad', 'Swat', 'Kohat', 'Dera Ismail Khan'],
+        ];
+
         $branches = [];
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
+            $division = $faker->randomElement(array_keys($divisionDistricts));
+            $district = $faker->randomElement($divisionDistricts[$division]);
+
             $branches[] = DB::table('branches')->insertGetId([
                 'name' => 'Branch ' . $i,
-                'district' => $faker->state,
+                'division' => $division,
+                'district' => $district,
                 'city' => $faker->city,
                 'address' => $faker->address,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
+
 
         // 2. Users (using existing role_ids)
         $roleIds = DB::table('user_roles')->pluck('id')->toArray();

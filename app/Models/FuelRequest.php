@@ -9,7 +9,7 @@ class FuelRequest extends Model
     //
     public function vehicle()
     {
-        return $this->belongsTo(Vehicle::class, 'vehicle_id', 'RegID');
+        return $this->belongsTo(Vehicle::class, 'vehicle_id', 'RegID')->withTrashed();
     }
 
     public function user()

@@ -161,7 +161,7 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                         <option disabled selected>Select Branch</option>
                         @foreach ($branches as $branch)
-                            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                            <option value="{{ $branch->id }}">{{ $branch->name }} - ( {{ $branch->division }} , {{ $branch->district }})</option>
                         @endforeach
                     </select>
                     @error('branch_id')

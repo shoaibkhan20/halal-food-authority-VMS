@@ -73,9 +73,15 @@
                         class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700">
                         Edit
                     </button>
-                    <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500">
-                        Delete
-                    </button>
+                    <form action="{{ route('vehicles.destroy', $vehicle->RegID) }}" method="POST"
+                        onsubmit="return confirm('Are you sure you want to delete this vehicle?');" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500">
+                            Delete
+                        </button>
+                    </form>
+
                 </div>
             @endif
 

@@ -184,8 +184,11 @@
                                         $location = $record->vehicle->branch->district ?? 'N/A';
                                         $status = ucfirst($record->status);
                                         $actions = '';
-                                        if ($record->status === 'completed') {
-                                            $actions = '<label for="modal-' . $record->id . '" class="btn btn-sm bg-green-800 text-white">Bill</label>';
+                                        $report = $record->supervisorReports->first();
+                                        if ($report && $report->report_file_path) {
+                                            $actions = '<a href="' . asset('storage/' . $report->report_file_path) . '" target="_blank" class="btn btn-sm bg-green-800 text-white">Report</a>';
+                                        } else {
+                                            $actions = '<span class="text-gray-500 text-sm">No Report</span>';
                                         }
                                         return [$regId, $date, $cost, $items, $location, $status, $actions];
                                     })->toArray();
