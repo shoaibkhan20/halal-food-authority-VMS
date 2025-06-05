@@ -3,7 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-
+use App\Models\VehicleAssignment;
+use App\Observers\VehicleAssignmentObserver;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -19,6 +20,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        
+        VehicleAssignment::observe(VehicleAssignmentObserver::class);
     }
 }

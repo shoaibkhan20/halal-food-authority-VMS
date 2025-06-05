@@ -3,46 +3,38 @@
 namespace App\Observers;
 
 use App\Models\VehicleAssignment;
+use App\Models\Vehicle;
 
 class VehicleAssignmentObserver
 {
-    /**
-     * Handle the VehicleAssignment "created" event.
-     */
-    public function created(VehicleAssignment $vehicleAssignment): void
+    public function created(VehicleAssignment $assignment)
     {
-        //
+        $this->syncVehicleStatus($assignment->vehicle_id);
     }
 
-    /**
-     * Handle the VehicleAssignment "updated" event.
-     */
-    public function updated(VehicleAssignment $vehicleAssignment): void
+    public function updated(VehicleAssignment $assignment)
     {
-        //
+        $this->syncVehicleStatus($assignment->vehicle_id);
     }
 
-    /**
-     * Handle the VehicleAssignment "deleted" event.
-     */
-    public function deleted(VehicleAssignment $vehicleAssignment): void
+    public function deleted(VehicleAssignment $assignment)
     {
-        //
+        $this->syncVehicleStatus($assignment->vehicle_id);
     }
 
-    /**
-     * Handle the VehicleAssignment "restored" event.
-     */
-    public function restored(VehicleAssignment $vehicleAssignment): void
+    private function syncVehicleStatus($vehicleId)
     {
-        //
-    }
+        $vehicle = Vehicle::find($vehicleId);
 
-    /**
-     * Handle the VehicleAssignment "force deleted" event.
-     */
-    public function forceDeleted(VehicleAssignment $vehicleAssignment): void
-    {
-        //
+        if (!$vehicle) return;
+
+        // Check if there are any active (non-returned) assignments
+        $hasActiveAssignment = $vehicle->assignments()
+            ->whereNull('returned_date')
+            ->exists();
+
+        $vehicle->update([
+            'status' => $hasActiveAssignment ? 'Assigned' : 'Available',
+        ]);
     }
 }

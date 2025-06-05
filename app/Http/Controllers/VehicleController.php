@@ -155,61 +155,57 @@ class VehicleController extends Controller
             'vehicle_id' => 'required|exists:vehicles,RegID',
             'user_id' => 'required|exists:users,id',
         ]);
-        // End any existing active assignment for this vehicle
-        VehicleAssignment::where('vehicle_id', $request->vehicle_id)
-            ->whereNull('returned_date')
-            ->update(['returned_date' => now()]);
-        // Create new assignment
-        VehicleAssignment::create([
-            'vehicle_id' => $request->vehicle_id,
-            'user_id' => $request->user_id,
-            'assigned_date' => now(),
-            'returned_date' => null,
-        ]);
-        
-        // Update vehicle status to 'Assigned'
+
+        \DB::transaction(function () use ($request) {
+            // Close any previous active assignments
+            VehicleAssignment::where('vehicle_id', $request->vehicle_id)
+                ->whereNull('returned_date')
+                ->update(['returned_date' => now()]);
+
+            // Create new assignment
+            VehicleAssignment::create([
+                'vehicle_id' => $request->vehicle_id,
+                'user_id' => $request->user_id,
+                'assigned_date' => now(),
+                'returned_date' => null,
+            ]);
+            // Observer will update vehicle status automatically
+        });
+
         return redirect()->back()->with('success', 'Vehicle reassigned successfully.');
     }
 
 
+
     public function deallocateVehicle(Request $request, $regid)
     {
-        // End the active assignment
-        VehicleAssignment::where('vehicle_id', $regid)
-            ->whereNull('returned_date')
-            ->update(['returned_date' => now()]);
-        // Check if there are any active assignments left for this vehicle
-        $hasActiveAssignment = VehicleAssignment::where('vehicle_id', $regid)
-            ->whereNull('returned_date')
-            ->exists();
-        // If no active assignments, set vehicle status to 'Available'
-        if (!$hasActiveAssignment) {
-            Vehicle::where('RegID', $regid)->update(['status' => 'Available']);
-        }
-
+        \DB::transaction(function () use ($regid) {
+            $activeAssignments = VehicleAssignment::where('vehicle_id', $regid)
+                ->whereNull('returned_date')
+                ->get();
+            foreach ($activeAssignments as $assignment) {
+                $assignment->returned_date = now();
+                $assignment->save(); // This triggers updated() event in observer
+            }
+        });
         return redirect()->back()->with('success', 'Vehicle deallocated successfully.');
     }
-
-
+    
     public function details($regid)
     {
         $vehicle = Vehicle::with(['latestAssignment.user', 'maintenanceRecords', 'branch'])->where('RegID', $regid)->firstOrFail();
         // Determine the vehicle status
         if ($vehicle->latestAssignment) {
-            $status = 'assigned';
             $assignmentDetails = $vehicle->latestAssignment;
         } elseif ($vehicle->isUnderMaintenance()) {
-            $status = 'under maintenance';
             $assignmentDetails = null;
         } else {
-            $status = 'available';
             $assignmentDetails = null;
         }
         $branches = Branch::all();
         $vehicleTypes = VehicleType::all()->unique();
         return view('dashboard.shared.vehicledetails', [
             'vehicle' => $vehicle,
-            'status' => $status,
             'assignment' => $assignmentDetails,
             'branches' => $branches,
             'vehicleTypes' => $vehicleTypes,
