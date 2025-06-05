@@ -7,7 +7,8 @@ use App\Models\Vehicle;
 use App\Models\VehicleMaintenance;
 use App\Models\VehicleSupervisorReport;
 use Illuminate\Support\Carbon;
-
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 class ReportController extends Controller
 {
     //
@@ -65,30 +66,77 @@ class ReportController extends Controller
     {
         $regId = $request->query('reg_id');
         $date = $request->query('date');
-
-        // Build query with eager loading
         $query = VehicleMaintenance::with([
-            'vehicle.branch',         // Vehicle and its branch (for location)
-            'supervisorReports' // Supervisor details through reports
-        ])->whereNotNull('completed_at'); // Only completed maintenances
-
-        // Optional filtering by RegID
+            'vehicle.branch',
+            'supervisorReports.supervisor'
+        ])->whereNotNull('completed_at');
         if ($regId) {
             $query->whereHas('vehicle', function ($q) use ($regId) {
                 $q->where('RegID', 'like', '%' . $regId . '%');
             });
         }
-
-        // Optional filtering by completed date
         if ($date) {
             $query->whereDate('completed_at', $date);
         }
-
-        // Get full record (no mapping here)
         $records = $query->orderByDesc('completed_at')->get();
+        // Group by vehicle and summarize
+        $groupedRecords = $records->groupBy('vehicle_id')->map(function ($group) {
+            $vehicle = $group->first()->vehicle;
 
-        // Return to view with raw data
-        return view('dashboard.shared.maintenance-report', compact('records'));
+            return [
+                'vehicle_id' => $vehicle->RegID,
+                'branch' => optional($vehicle->branch)->district,
+                'total_cost' => $group->sum('actual_cost'),
+                'vehicle' => $vehicle,
+                'maintenance_history' => $group,
+            ];
+        })->values();
+        return view('dashboard.shared.maintenance-report', compact('groupedRecords'));
+    }
+
+
+
+    public function generateVehicleReport(Request $request)
+    {
+        try {
+            // Sanitize and validate input
+            $vehicleId = trim($request->input('vehicle_id'));
+            if (empty($vehicleId)) {
+                return back()->with('error', 'Vehicle ID is required.');
+            }
+            // Find vehicle record
+            $vehicle = Vehicle::with('branch')->where('RegID', $vehicleId)->withTrashed()->first();
+            if (!$vehicle) {
+                return back()->with('error', "No vehicle found with Reg ID: {$vehicleId}");
+            }
+            // Fetch maintenance records
+            $maintenanceRecords = VehicleMaintenance::with(['supervisorReports.supervisor'])
+                ->where('vehicle_id', $vehicleId)
+                ->whereNotNull('completed_at')
+                ->orderByDesc('completed_at')
+                ->get();
+            if ($maintenanceRecords->isEmpty()) {
+                return back()->with('error', 'No completed maintenance records found for this vehicle.');
+            }
+            // Calculate total cost
+            $totalCost = $maintenanceRecords->sum('actual_cost');
+            // Generate the PDF
+            $pdf = Pdf::loadView('pdf.maintenance-report', [
+                'vehicle' => $vehicle,
+                'records' => $maintenanceRecords,
+                'totalCost' => $totalCost,
+            ]);
+            return $pdf->download("maintenance-report-{$vehicleId}.pdf");
+        } catch (\Exception $e) {
+            // Log error for debugging
+            Log::error('Error generating maintenance report PDF', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'vehicle_id' => $request->input('vehicle_id')
+            ]);
+
+            return back()->with('error', 'An unexpected error occurred while generating the report.');
+        }
     }
 
 

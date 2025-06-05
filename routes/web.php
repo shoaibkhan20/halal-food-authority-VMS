@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/reporting', [ReportController::class, 'index'])->name('reports');
         Route::get('/reporting/vehicle-status', [ReportController::class, 'vehicleStatus'])->name('report.vehicle-status');
         Route::get('/reporting/maintenance-report', [ReportController::class, 'MaintenanceReport'])->name('report.maintenance');
+        Route::post('/maintenance-report/pdf', [ReportController::class, 'generateVehicleReport'])->name('maintenance.report.pdf');
+
     });
     // maintenance approve / reject
     Route::middleware('role:director-admin,committe-user')->group(function () {
