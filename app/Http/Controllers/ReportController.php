@@ -7,8 +7,10 @@ use App\Models\Vehicle;
 use App\Models\VehicleMaintenance;
 use App\Models\VehicleSupervisorReport;
 use Illuminate\Support\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
+// use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use TCPDF;
 class ReportController extends Controller
 {
     //
@@ -82,10 +84,10 @@ class ReportController extends Controller
         // Group by vehicle and summarize
         $groupedRecords = $records->groupBy('vehicle_id')->map(function ($group) {
             $vehicle = $group->first()->vehicle;
-
             return [
                 'vehicle_id' => $vehicle->RegID,
-                'branch' => optional($vehicle->branch)->district,
+                'division' => optional($vehicle->branch)->division,
+                'district' => optional($vehicle->branch)->district,
                 'total_cost' => $group->sum('actual_cost'),
                 'vehicle' => $vehicle,
                 'maintenance_history' => $group,
@@ -95,49 +97,64 @@ class ReportController extends Controller
     }
 
 
-
     public function generateVehicleReport(Request $request)
     {
         try {
-            // Sanitize and validate input
-            $vehicleId = trim($request->input('vehicle_id'));
-            if (empty($vehicleId)) {
-                return back()->with('error', 'Vehicle ID is required.');
+            $vehicleId = $request->input('vehicle_id');
+
+            if (!$vehicleId) {
+                abort(400, 'Vehicle ID is required.');
             }
-            // Find vehicle record
-            $vehicle = Vehicle::with('branch')->where('RegID', $vehicleId)->withTrashed()->first();
-            if (!$vehicle) {
-                return back()->with('error', "No vehicle found with Reg ID: {$vehicleId}");
-            }
-            // Fetch maintenance records
-            $maintenanceRecords = VehicleMaintenance::with(['supervisorReports.supervisor'])
+
+            $vehicle = Vehicle::with('branch')->where('RegID', $vehicleId)->withTrashed()->firstOrFail();
+
+            $maintenanceRecords = VehicleMaintenance::with('supervisorReports.supervisor')
                 ->where('vehicle_id', $vehicleId)
                 ->whereNotNull('completed_at')
                 ->orderByDesc('completed_at')
                 ->get();
-            if ($maintenanceRecords->isEmpty()) {
-                return back()->with('error', 'No completed maintenance records found for this vehicle.');
-            }
-            // Calculate total cost
+
             $totalCost = $maintenanceRecords->sum('actual_cost');
-            // Generate the PDF
-            $pdf = Pdf::loadView('pdf.maintenance-report', [
+
+            // Generate logo image as base64
+            $logoPath = public_path('images/logo.png');
+            $base64logo = '';
+            if (file_exists($logoPath)) {
+                $base64logo = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            }
+
+            // Generate the HTML content manually or using a view:
+            $html = view('pdf.maintenance-report-tcpdf', [
                 'vehicle' => $vehicle,
                 'records' => $maintenanceRecords,
                 'totalCost' => $totalCost,
-            ]);
-            return $pdf->download("maintenance-report-{$vehicleId}.pdf");
-        } catch (\Exception $e) {
-            // Log error for debugging
-            Log::error('Error generating maintenance report PDF', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'vehicle_id' => $request->input('vehicle_id')
-            ]);
+                'base64logo' => $base64logo
+            ])->render();
 
-            return back()->with('error', 'An unexpected error occurred while generating the report.');
+            // Initialize TCPDF
+            $pdf = new \TCPDF();
+            $pdf->SetCreator('Laravel TCPDF');
+            $pdf->SetAuthor('VMS');
+            $pdf->SetTitle("Maintenance Report - $vehicleId");
+            $pdf->SetMargins(10, 1, 10);
+            $pdf->AddPage();
+
+            // Write the HTML content
+            $pdf->writeHTML($html, true, false, true, false, '');
+
+            // Return as response
+            return response($pdf->Output("maintenance-report-{$vehicleId}.pdf", 'S'))
+                ->header('Content-Type', 'application/pdf');
+        } catch (\Throwable $e) {
+            \Log::error('TCPDF generation failed: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'An error occurred while generating the PDF.',
+                'details' => $e->getMessage()
+            ], 500);
         }
     }
+
+
 
 
     public function createSupervisorReport(Request $request, $id)

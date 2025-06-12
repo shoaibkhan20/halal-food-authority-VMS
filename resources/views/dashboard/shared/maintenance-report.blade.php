@@ -49,13 +49,14 @@
                 {{--
                 <pre>{{ $records }}</pre> --}}
                 @php
-                    $headers = ['Reg ID', 'Total Cost', 'Location', ''];
+                    $headers = ['Reg ID', 'Total Cost', 'Division','District', ''];
                     $rows = [];
 
                     foreach ($groupedRecords as $group) {
                         $regId = $group['vehicle_id'];
                         $cost = '$' . number_format($group['total_cost'], 2);
-                        $location = $group['branch'] ?? 'N/A';
+                        $division = $group['division'] ?? 'N/A';
+                        $district = $group['district'] ?? 'N/A';
 
                         $button = '<form method="POST" class="w-full flex justify-end" action="' . route('maintenance.report.pdf') . '" target="_blank">'
                             . csrf_field()
@@ -63,7 +64,7 @@
                             . '<button type="submit" class="btn btn-sm bg-green-800 text-white">Generate Report</button>'
                             . '</form>';
 
-                        $rows[] = [$regId, $cost, $location, $button];
+                        $rows[] = [$regId, $cost, $division,$district, $button];
                     }
                 @endphp
 

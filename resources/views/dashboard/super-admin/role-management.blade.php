@@ -71,11 +71,11 @@
                             $user->username,
                             $user->contact,
                             '
-                                                <div class="flex gap-1">
-                                                <button onclick="openEditModal(\'' . $userJson . '\')" class="btn btn-sm cursor-pointer px-3 py-1 text-sm  text-green-800 border-b">Edit</button>
-                                                <button onclick="DeleteRequest(\'' . $userJson . '\')" class="btn btn-sm btn-danger cursor-pointer px-3 py-1 text-sm  text-red-800 border-b">Delete</button>
-                                                </div>
-                                                ',
+                            <div class="flex gap-1">
+                            <button onclick="openEditModal(\'' . $userJson . '\')" class="btn btn-sm cursor-pointer px-3 py-1 text-sm  text-green-800 border-b">Edit</button>
+                            <button onclick="DeleteRequest(\'' . $userJson . '\')" class="btn btn-sm btn-danger cursor-pointer px-3 py-1 text-sm  text-red-800 border-b">Delete</button>
+                            </div>
+                            ',
                         ];
                     })->toArray();
                 @endphp
