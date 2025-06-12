@@ -52,7 +52,6 @@ class UserController extends Controller
             'role_id' => 'required|exists:user_roles,id',
         ]);
         User::create($validated);
-
         return redirect()->route('users.role-management')->with('success', 'User created successfully.');
     }
 
@@ -64,10 +63,9 @@ class UserController extends Controller
     //     return view('users.edit', compact('user', 'roles', 'branches'));
     // }
 
-    // Update user
+    //Update user
     public function update(Request $request, User $user)
     {
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'contact' => ['required', 'string', Rule::unique('users', 'contact')->ignore($user->id)],
@@ -76,7 +74,6 @@ class UserController extends Controller
             'role_id' => 'nullable|exists:user_roles,id',
             'password' => 'nullable|string|min:6',
         ]);
-
         if (!$request->filled('password')) {
             unset($validated['password']);
         }
@@ -86,10 +83,8 @@ class UserController extends Controller
         if (!$request->filled('branch_id')) {
             unset($validated['branch_id']);
         }
-
-
         $user->update($validated);
-        return redirect()->route('users.role-management')->with('success', 'User updated successfully.');
+        return redirect()->route('users.role-management')->with('success', 'User Updated Successfully');
     }
 
     // Delete user

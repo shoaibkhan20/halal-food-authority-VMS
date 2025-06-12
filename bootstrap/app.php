@@ -12,6 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // ✅ Global middleware: runs on all routes
+        $middleware->append([
+            \App\Http\Middleware\BlockMobileDevices::class,
+        ]);
+
+        // ✅ Route middleware aliases
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);

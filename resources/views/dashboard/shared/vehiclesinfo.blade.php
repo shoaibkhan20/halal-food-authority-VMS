@@ -5,9 +5,9 @@
 
     @if (request('search'))
         <div class="w-full min-h-screen flex items-start justify-center">
-            <div class="w-[85%] h-full bg-white p-8 rounded-lg shadow-xl relative">
+            <div class="w-[85%] h-full bg-white p-8 rounded-lg shadow-xl relative ">
                 <h2 class="text-2xl font-bold text-center mb-6">Seached Vehicles</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($regIds as $vehicle)
                         <div>
                             <button onclick="window.location='{{ route('vehicle.details', ['regid' => $vehicle->RegID]) }}'"
@@ -33,7 +33,7 @@
             <div class="w-full h-full grid place-items-center rounded-lg bg-white">
                 <div class="min-h-[450px]">
                     <div class="flex justify-between items-center mb-6">
-                        
+
                         <h1 class="text-3xl font-bold">Vehicle Information</h1>
                         @if(Auth::user()->role->role_name === 'super-admin')
                             <div>
@@ -54,7 +54,6 @@
                                 {{ session('success') }}
                             </div>
                         @endif
-
                         @if ($errors->any())
                             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
                                 <ul class="list-disc pl-5">
@@ -138,7 +137,7 @@
                             <select name="branch_id" class="select select-bordered w-full">
                                 <option value="" hidden>Select Branch</option>
                                 @foreach($branches as $branch)
-                                    <option value="{{ $branch->id }}">{{ $branch->name }} ({{ $branch->location }})</option>
+                                    <option value="{{ $branch->id }}">{{ $branch->name }} ({{ $branch->district }})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -160,9 +159,7 @@
                 <form method="dialog">
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
-
                 <h3 class="text-2xl font-semibold mb-4 text-center">Assign Vehicle to User</h3>
-
                 <form method="POST" action="{{ route('vehicle.assign') }}" class="space-y-6">
                     @csrf
 

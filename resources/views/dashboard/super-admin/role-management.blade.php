@@ -10,22 +10,16 @@
                 <div class="flex justify-between">
                     <div class="mb-6 relative w-full max-w-xs">
                         <form action="{{ route('users.role-management') }}" method="GET">
-                            <input 
-                                type="text" 
-                                id="filterSearch" 
-                                name="search" 
-                                placeholder="Search id or Name " 
-                                class="border border-gray-300 rounded px-4 py-1 w-full pr-8" 
-                                value="{{ request('search') }}"
-                            >
+                            <input type="text" id="filterSearch" name="search" placeholder="Search id or Name "
+                                class="border border-gray-300 rounded px-4 py-1 w-full pr-8"
+                                value="{{ request('search') }}">
 
                             @if(request('search'))
-                            <a href="{{ route('users.role-management') }}" 
-                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                            aria-label="Clear search"
-                            >
-                                &times;
-                            </a>
+                                <a href="{{ route('users.role-management') }}"
+                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    aria-label="Clear search">
+                                    &times;
+                                </a>
                             @endif
                         </form>
                     </div>
@@ -63,19 +57,19 @@
                             'username' => $user->username,
                             'contact' => $user->contact
                         ]), ENT_QUOTES, 'UTF-8');
-
+                        $action = '
+                            <div class="flex gap-1">
+                            <button onclick="openEditModal(\'' . $userJson . '\')" class="btn btn-sm cursor-pointer px-3 py-1 text-sm  text-green-800 border-b">Edit</button>
+                            <button onclick="DeleteRequest(\'' . $userJson . '\')" class="btn btn-sm btn-danger cursor-pointer px-3 py-1 text-sm  text-red-800 border-b">Delete</button>
+                            </div>
+                            ';
                         return [
                             $user->id,
                             $user->name,
                             $user->role?->role_name,
                             $user->username,
                             $user->contact,
-                            '
-                            <div class="flex gap-1">
-                            <button onclick="openEditModal(\'' . $userJson . '\')" class="btn btn-sm cursor-pointer px-3 py-1 text-sm  text-green-800 border-b">Edit</button>
-                            <button onclick="DeleteRequest(\'' . $userJson . '\')" class="btn btn-sm btn-danger cursor-pointer px-3 py-1 text-sm  text-red-800 border-b">Delete</button>
-                            </div>
-                            ',
+                            $action,
                         ];
                     })->toArray();
                 @endphp
@@ -161,7 +155,9 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                         <option disabled selected>Select Branch</option>
                         @foreach ($branches as $branch)
-                            <option value="{{ $branch->id }}">{{ $branch->name }} - ( {{ $branch->division }} , {{ $branch->district }})</option>
+                            <option value="{{ $branch->id }}">{{ $branch->name }} - ( {{ $branch->division }} ,
+                                {{ $branch->district }})
+                            </option>
                         @endforeach
                     </select>
                     @error('branch_id')
@@ -238,15 +234,19 @@
                 </div>
 
                 <!-- Role -->
+
                 <div>
                     <label class="block mb-1 text-sm text-gray-700">Role *</label>
-                    <select name="role_id" id="update-role" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option disabled selected>Select role</option>
-                        @foreach ($roles as $role)
-                            <option value="{{ $role->id }}">{{ $role->role_name }}</option>
-                        @endforeach
-                    </select>
+                    
+                        <select name="role_id" id="update-role" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <option disabled selected>Select role</option>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role->id }}">{{ $role->role_name }}</option>
+                            @endforeach
+                        </select>
+                   
+
                     @error('role_id')
                         <p class="text-red-600 text-sm">{{ $message }}</p>
                     @enderror
@@ -317,8 +317,11 @@
 
         function DeleteRequest(userJson) {
             const user = JSON.parse(userJson);
+            if (user.role_name === "super-admin") {
+                alert("You cannot delete the super admin");
+                return;
+            }
             if (!confirm(`Are you sure you want to delete this user ${user.name}?`)) return;
-
             fetch(`/super-admin/delete-user/${user.id}`, {
                 method: "DELETE",
                 headers: {
