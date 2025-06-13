@@ -18,9 +18,8 @@ class VehicleSupervisorReport extends Model
     {
         return $this->belongsTo(VehicleMaintenance::class);
     }
-
     public function supervisor()
     {
-        return $this->belongsTo(User::class, 'generated_by');
+        return $this->belongsTo(User::class, 'generated_by')->withTrashed();
     }
 }

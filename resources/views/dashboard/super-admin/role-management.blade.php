@@ -47,7 +47,7 @@
                 @endif
 
                 @php
-                    $headers = ['User ID', 'Name', 'Role', 'Username', 'Contact', 'Action'];
+                    $headers = ['User ID', 'Name', 'Role', 'Username','Password', 'Contact', 'Action'];
 
                     $rows = $users->map(function ($user) {
                         $userJson = htmlspecialchars(json_encode([
@@ -55,6 +55,7 @@
                             'name' => $user->name,
                             'role_name' => $user->role?->role_name,
                             'username' => $user->username,
+                            'password'=>$user->password,
                             'contact' => $user->contact
                         ]), ENT_QUOTES, 'UTF-8');
                         $action = '
@@ -68,6 +69,7 @@
                             $user->name,
                             $user->role?->role_name,
                             $user->username,
+                            $user->password,
                             $user->contact,
                             $action,
                         ];
@@ -299,6 +301,7 @@
             document.getElementById('update-name').value = user.name || '';
             document.getElementById('update-contact').value = user.contact || '';
             document.getElementById('update-username').value = user.username || '';
+            document.getElementById('update-password').value = user.password || '';
 
             // Set role and branch (you must pass role_id and branch_id in JSON)
             if (user.role_name) {

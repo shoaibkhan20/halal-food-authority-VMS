@@ -61,23 +61,23 @@ class MaintenanceRequest extends Model
 
     public function appliedBy()
     {
-        return $this->belongsTo(User::class, 'applied_by');
+        return $this->belongsTo(User::class, 'applied_by')->withTrashed();
     }
 
     public function directorReviewer()
     {
-        return $this->belongsTo(User::class, 'director_reviewed_by');
+        return $this->belongsTo(User::class, 'director_reviewed_by')->withTrashed();
     }
 
 
     public function committeeReviewer()
     {
-        return $this->belongsTo(User::class, 'committee_reviewed_by');
+        return $this->belongsTo(User::class, 'committee_reviewed_by')->withTrashed();
     }
 
     public function finalDirectorApprover()
     {
-        return $this->belongsTo(User::class, 'director_final_approved_by');
+        return $this->belongsTo(User::class, 'director_final_approved_by')->withTrashed();
     }
 
     public function supervisorReports()

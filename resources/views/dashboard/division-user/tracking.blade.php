@@ -10,7 +10,6 @@
                         @if($vehicle->latestLocation)
                             <button
                                onclick="showLiveLocationModal('{{ $vehicle->RegID }}', '{{ $vehicle->latestLocation->latitude }}', '{{ $vehicle->latestLocation->longitude }}', '{{ $vehicle->latestLocation->speed }}')"
-
                                 class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
                                 @if ($vehicle->Vehicle_Type === 'Mobile_lab')
                                     <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
