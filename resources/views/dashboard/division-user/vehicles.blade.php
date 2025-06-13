@@ -51,6 +51,9 @@
                         </form>
                     </div>
                     {{-- vehicle info boxes --}}
+                    @if($regIds->isEmpty())
+                        <h1 class="text-center mt-5">No vehicles found </h1>
+                    @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ">
                         @foreach($regIds->take(6) as $vehicle)
                                 <div onclick="window.location='{{ route('vehicle.details', ['regid' => $vehicle->RegID]) }}'"
@@ -65,6 +68,7 @@
                             
                         @endforeach
                     </div>
+                    @endif
                 </div>
             </div>
         </div>

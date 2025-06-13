@@ -31,7 +31,7 @@
     @else
         <div class="w-full min-h-screen grid place-items-center">
             <div class="w-full h-full grid place-items-center rounded-lg bg-white">
-                <div class="min-h-[450px]">
+                <div class="min-h-[450px] min-w-[70%]">
                     <div class="flex justify-between items-center mb-6">
 
                         <h1 class="text-3xl font-bold">Vehicle Information</h1>
@@ -78,6 +78,9 @@
                         </form>
                     </div>
                     {{-- vehicle info boxes --}}
+                    @if($regIds->isEmpty())
+                        <h1 class="text-center mt-5">No vehicles found </h1>
+                    @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         @foreach($regIds->take(6) as $vehicle)
                             <div onclick="window.location='{{ route('vehicle.details', ['regid' => $vehicle->RegID]) }}'"
@@ -91,6 +94,7 @@
                             </div>
                         @endforeach
                     </div>
+                    @endif
                 </div>
             </div>
         </div>

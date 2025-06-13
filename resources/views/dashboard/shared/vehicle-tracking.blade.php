@@ -28,7 +28,7 @@
     @else
         <div class="w-full min-h-screen grid place-items-center">
             <div class="w-full h-full grid place-items-center rounded-lg bg-white">
-                <div class="min-h-[450px]">
+                <div class="min-h-[450px] min-w-[70%]">
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-3xl font-bold">Vehicle Information</h1>
                     </div>
@@ -48,6 +48,9 @@
                         </form>
                     </div>
                     {{-- vehicle info boxes --}}
+                    @if($vehicles->isEmpty())
+                        <h1 class="text-center mt-5">No vehicles locations found </h1>
+                    @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         @foreach($vehicles->take(6) as $vehicle)
                             <button
@@ -63,6 +66,7 @@
                             </button>
                         @endforeach
                     </div>
+                    @endif
                 </div>
             </div>
         </div>

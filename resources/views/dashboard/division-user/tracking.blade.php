@@ -48,6 +48,9 @@
                         </form>
                     </div>
                     {{-- vehicle info boxes --}}
+                    @if($vehicles->isEmpty())
+                        <h1 class="text-center mt-5">No vehicles found </h1>
+                    @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         @foreach($vehicles->take(6) as $vehicle)
                             <button
@@ -62,6 +65,7 @@
                             </button>
                         @endforeach
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
