@@ -238,7 +238,7 @@ class VehicleController extends Controller
     public function tracking(Request $request)
     {
         // Start the query to get vehicles with their latest location
-        $query = Vehicle::with('latestLocation')->has('locations');
+        $query = Vehicle::with('latestLocation');
         // If search query is provided, filter based on RegID
         if ($search = $request->input('search')) {
             $query->where('RegID', 'LIKE', '%' . $search . '%');
@@ -255,7 +255,6 @@ class VehicleController extends Controller
         $userDistrict = optional($user->branch)->district;
 
         $query = Vehicle::with('latestLocation')
-            ->has('locations')
             ->whereHas('branch', function ($q) use ($userDistrict) {
                 $q->where('district', $userDistrict);
             });
@@ -271,9 +270,7 @@ class VehicleController extends Controller
     {
         $user = Auth::user();
         $userDivision = optional($user->branch)->division;
-
         $query = Vehicle::with('latestLocation')
-            ->has('locations')
             ->whereHas('branch', function ($q) use ($userDivision) {
                 $q->where('division', $userDivision);
             });
@@ -281,9 +278,7 @@ class VehicleController extends Controller
         if ($search = $request->input('search')) {
             $query->where('RegID', 'LIKE', '%' . $search . '%');
         }
-
         $vehicles = $query->get();
-
         return view('dashboard.division-user.tracking', compact('vehicles'));
     }
 

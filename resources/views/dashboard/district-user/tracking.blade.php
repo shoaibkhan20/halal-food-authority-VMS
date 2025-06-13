@@ -7,16 +7,30 @@
                 <h2 class="text-2xl font-bold text-center mb-6">Seached Vehicles</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     @foreach($vehicles as $vehicle)
-                        <button
-                            onclick="showLiveLocationModal({{ $vehicle->latestLocation->latitude }}, {{ $vehicle->latestLocation->longitude }}, {{ $vehicle->latestLocation->speed }})"
-                            class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
-                            @if ($vehicle->Vehicle_Type === 'Mobile_lab')
-                                vcx<img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                        @if($vehicle->latestLocation)
+                            <button
+                               onclick="showLiveLocationModal('{{ $vehicle->RegID }}', '{{ $vehicle->latestLocation->latitude }}', '{{ $vehicle->latestLocation->longitude }}', '{{ $vehicle->latestLocation->speed }}')"
+
+                                class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
+                                @if ($vehicle->Vehicle_Type === 'Mobile_lab')
+                                    <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                @else
+                                    <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                @endif
+                                <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
+                            </button>
                             @else
-                                <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
+                            <button
+                               onclick="alert('No LiveLocation Found')"
+                                class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
+                                @if ($vehicle->Vehicle_Type === 'Mobile_lab')
+                                    <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                @else
+                                    <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                @endif
+                                <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
+                            </button>
                             @endif
-                            <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
-                        </button>
                     @endforeach
                 </div>
                 <button onclick="window.history.back()"
@@ -53,8 +67,10 @@
                     @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         @foreach($vehicles->take(6) as $vehicle)
+                            @if($vehicle->latestLocation)
                             <button
-                                onclick="showLiveLocationModal('{{ $vehicle->RegID }}', '{{ $vehicle->latestLocation->latitude }}', '{{ $vehicle->latestLocation->longitude }}', '{{ $vehicle->latestLocation->speed }}')"
+                               onclick="showLiveLocationModal('{{ $vehicle->RegID }}', '{{ $vehicle->latestLocation->latitude }}', '{{ $vehicle->latestLocation->longitude }}', '{{ $vehicle->latestLocation->speed }}')"
+
                                 class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
                                 @if ($vehicle->Vehicle_Type === 'Mobile_lab')
                                     <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
@@ -63,6 +79,18 @@
                                 @endif
                                 <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
                             </button>
+                            @else
+                            <button
+                               onclick="alert('No LiveLocation Found')"
+                                class="cursor-pointer bg-green-800 text-white rounded-lg p-6 flex flex-col items-center shadow w-50">
+                                @if ($vehicle->Vehicle_Type === 'Mobile_lab')
+                                    <img src="{{  asset('images/truckicon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                @else
+                                    <img src="{{  asset('images/caricon.png') }}" alt="icon" class="max-w-20 h-auto">
+                                @endif
+                                <span class="text-md  ">ID: {{ $vehicle->RegID }}</span>
+                            </button>
+                            @endif
                         @endforeach
                     </div>
                     @endif
