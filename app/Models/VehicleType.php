@@ -8,9 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class VehicleType extends Model
 {
     use HasFactory;
-
     protected $fillable = ['name'];  // You can adjust this depending on your table's fields
-
     // If you want a reverse relationship with Vehicles, add this:
     public function vehicles()
     {
