@@ -235,7 +235,7 @@
 
                 <!-- Role -->
 
-                <div>
+                <div id="role_section">
                     <label class="block mb-1 text-sm text-gray-700">Role *</label>
                     
                         <select name="role_id" id="update-role" required
@@ -301,8 +301,13 @@
             document.getElementById('update-username').value = user.username || '';
 
             // Set role and branch (you must pass role_id and branch_id in JSON)
-            if (user.role_id) {
-                document.getElementById('update-role').value = user.role_id;
+            if (user.role_name) {
+                if(user.role_name === 'super-admin'){
+                    document.getElementById('role_section').classList.add('hidden');
+                }else{
+                    document.getElementById('role_section').classList.remove('hidden');
+                    document.getElementById('update-role').value = user.role_id;
+                }
             }
             if (user.branch_id) {
                 document.getElementById('update-branch').value = user.branch_id;

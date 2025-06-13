@@ -28,7 +28,7 @@
     @else
         <div class="w-full min-h-screen grid place-items-center">
             <div class="w-full h-full grid place-items-center rounded-lg bg-white">
-                <div class="min-h-[450px]">
+                <div class="min-h-[450px] min-w-[70%]">
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-3xl font-bold">Vehicle Information</h1>
                     </div>

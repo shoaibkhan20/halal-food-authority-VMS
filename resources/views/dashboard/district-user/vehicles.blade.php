@@ -31,7 +31,7 @@
     @else
         <div class="w-full min-h-screen grid place-items-center">
             <div class="w-full h-full grid place-items-center rounded-lg bg-white">
-                <div class="min-h-[450px]">
+                <div class="min-h-[450px] min-w-[70%]">
                         <p>{{Auth::user()->branch->district}}</p>
 
                     <div class="flex justify-between items-center mb-6">
