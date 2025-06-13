@@ -13,8 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         // Seed user roles and initial super admin
         // $this->call(UserAndRoleSeeder::class);
-
         // Seed all other tables (excluding user_roles)
-        $this->call([UserAndRoleSeeder::class, VmsSeeder::class]);
+        $this->call([UserAndRoleSeeder::class]);
+        // $this->call([UserAndRoleSeeder::class, VmsSeeder::class]);
     }
 }
