@@ -138,7 +138,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Branch</label>
-                            <select name="branch_id" class="select select-bordered w-full">
+                            <select name="branch_id" class="select select-bordered w-full" >
                                 <option value="" hidden>Select Branch</option>
                                 @foreach($branches as $branch)
                                     <option value="{{ $branch->id }}">{{ $branch->name }} ({{ $branch->district }})</option>

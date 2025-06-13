@@ -23,27 +23,27 @@
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Model</td>
-                        <td class="py-3">{{ $vehicle->Model }}</td>
+                        <td class="py-3">{{ $vehicle->Model ?? 'N/A'}}</td>
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Fuel Type</td>
-                        <td class="py-3">{{ $vehicle->Fuel_type }}</td>
+                        <td class="py-3">{{ $vehicle->Fuel_type ??'N/A'}}</td>
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Vehicle Type</td>
-                        <td class="py-3">{{ $vehicle->Vehicle_Type }}</td>
+                        <td class="py-3">{{ $vehicle->Vehicle_Type ??'N/A'}}</td>
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Average Mileage</td>
-                        <td class="py-3">{{ $vehicle->Average_mileage }}</td>
+                        <td class="py-3">{{ $vehicle->Average_mileage ??'N/A'}}</td>
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Region</td>
-                        <td class="py-3">{{ $vehicle->branch->district }}</td>
+                        <td class="py-3">{{ $vehicle->branch->district ?? 'N/A'}}</td>
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Branch ID</td>
-                        <td class="py-3">{{ $vehicle->branch_id }}</td>
+                        <td class="py-3">{{ $vehicle->branch_id ?? 'N/A'}}</td>
                     </tr>
                     <tr class="border-b">
                         <td class="py-3 font-semibold">Status</td>

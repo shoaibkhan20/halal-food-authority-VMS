@@ -31,7 +31,7 @@ class UserAndRoleSeeder extends Seeder
             [
                 'name' => 'SuperAdmin',
                 'username' => 'superadmin',
-                'password' => Hash::make('password123'), // 👈 Change in production
+                'password' => 'password123', // 👈 Change in production
                 'role_id' => UserRole::where('role_name', 'super-admin')->first()->id,
                 'branch_id' => null // Or set a valid branch ID
             ]

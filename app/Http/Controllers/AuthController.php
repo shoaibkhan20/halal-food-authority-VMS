@@ -31,7 +31,7 @@ class AuthController extends Controller
                 ->orWhere('contact', $credentials['username'])
                 ->first();
 
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        if (!$user || !($credentials['password'] === $user->password)) {
             if ($isApi) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
