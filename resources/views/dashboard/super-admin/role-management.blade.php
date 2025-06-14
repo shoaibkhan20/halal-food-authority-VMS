@@ -54,6 +54,7 @@
                             'id' => $user->id,
                             'name' => $user->name,
                             'role_name' => $user->role?->role_name,
+                            'role_id' => $user->role?->id,
                             'username' => $user->username,
                             'password'=>$user->password,
                             'contact' => $user->contact
