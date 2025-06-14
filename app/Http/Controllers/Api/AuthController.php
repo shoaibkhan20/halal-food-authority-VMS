@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\VehicleAssignment;
 class AuthController extends Controller
 {
+
+
     public function login(Request $request)
     {
         $validation = Validator::make($request->all(), [
@@ -21,16 +24,35 @@ class AuthController extends Controller
 
         $user = User::where('username', $request->username)->first();
 
-        if (!$user || $request->password != $user->password) {
+        if (!$user || $request->password!= $user->password) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $token = $user->createToken('api_token')->plainTextToken;
+        // Load current assignment and vehicle
+        $user->load(['currentVehicleAssignments.vehicle']);
 
-        return response()->json([
-            'token' => $token,
-            'user' => $user,
-        ]);
+        $assignment = $user->currentVehicleAssignments;
+        $vehicle = $assignment?->vehicle;
+        $branch = $assignment?->vehicle->branch;
+
+        // Build custom response
+        $response = [
+            'regId' => $vehicle?->RegID,
+            'name' => $user->name,
+            'model' => $vehicle?->Model,
+            'driver' => $user->name,
+            'fuelType' => $vehicle?->Fuel_type,
+            'vehicleType' => $vehicle?->Vehicle_Type,
+            'averageMileage' => $vehicle?->Average_mileage,
+            'district' => $branch->district??NULL, // Or modify if you have a related district
+            'token' => $user->createToken('api_token')->plainTextToken,
+            'contact' => $user->contact,
+
+        ];
+
+        return response()->json($response);
     }
+
+
 
 }

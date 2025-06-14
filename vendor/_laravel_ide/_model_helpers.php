@@ -1945,6 +1945,7 @@ namespace App\Models {
      * @property-read \App\Models\Branch $branch
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VehicleAssignment> $vehicleAssignments
      * @property-read int|null $vehicleAssignments_count
+     * @property-read \App\Models\VehicleAssignment $currentVehicleAssignments
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Logbook> $logbooks
      * @property-read int|null $logbooks_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MaintenanceRequest> $maintenanceRequests

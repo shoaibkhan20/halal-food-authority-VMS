@@ -47,6 +47,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(VehicleAssignment::class);
     }
+    public function currentVehicleAssignments()
+    {
+        return $this->hasOne(VehicleAssignment::class)->whereNull('returned_date');
+    }
 
     public function logbooks()
     {
