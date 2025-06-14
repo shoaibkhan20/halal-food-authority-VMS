@@ -11,6 +11,7 @@ class MaintenanceRequest extends Model
         'applied_by',
         'issue',
         'estimated_cost',
+        'request_description',
         'status',
 
         'director_status',

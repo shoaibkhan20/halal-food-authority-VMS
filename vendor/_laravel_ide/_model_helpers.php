@@ -1590,6 +1590,7 @@ namespace App\Models {
      *
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
+     * @property string|null $request_description
      * @property float|null $estimated_cost
      * @property string $issue
      * @property string|null $director_final_rejection_message
@@ -1630,6 +1631,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<MaintenanceRequest>|MaintenanceRequest whereDirectorFinalRejectionMessage($value)
      * @method static \Illuminate\Database\Eloquent\Builder<MaintenanceRequest>|MaintenanceRequest whereIssue($value)
      * @method static \Illuminate\Database\Eloquent\Builder<MaintenanceRequest>|MaintenanceRequest whereEstimatedCost($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<MaintenanceRequest>|MaintenanceRequest whereRequestDescription($value)
      * @method static \Illuminate\Database\Eloquent\Builder<MaintenanceRequest>|MaintenanceRequest whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<MaintenanceRequest>|MaintenanceRequest whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<MaintenanceRequest>|MaintenanceRequest newModelQuery()
