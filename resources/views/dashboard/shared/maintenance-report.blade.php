@@ -54,7 +54,7 @@
 
                     foreach ($groupedRecords as $group) {
                         $regId = $group['vehicle_id'];
-                        $cost = '$' . number_format($group['total_cost'], 2);
+                        $cost =  number_format($group['total_cost'], 2);
                         $division = $group['division'] ?? 'N/A';
                         $district = $group['district'] ?? 'N/A';
 

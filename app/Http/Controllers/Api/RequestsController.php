@@ -21,17 +21,30 @@ class RequestsController extends Controller
                 'estimatedCost' => 'nullable|numeric',
                 'comment' => 'nullable|string',
             ]);
+
+            // Check for existing request with same regId and status != final_approved
+            $existing = MaintenanceRequest::where('vehicle_id', $validated['regId'])
+                ->where('status', '!=', 'final_approved')
+                ->exists();
+
+            if ($existing) {
+                return response()->json([
+                    'message' => 'A maintenance request for this vehicle already exists and is not final approved.',
+                ], 409); // 409 Conflict
+            }
             // Create maintenance request
             $maintenance = MaintenanceRequest::create([
-                'vehicle_id' => $validated['vehicle_id'],
+                'vehicle_id' => $validated['regId'],
                 'applied_by' => auth()->id(),
                 'issue' => $validated['issue'],
-                'estimated_cost' => $validated['estimated_cost'] ?? null,
+                'estimated_cost' => $validated['estimatedCost'] ?? null,
                 'request_description' => $validated['comment'] ?? null,
             ]);
+
             return response()->json([
                 'message' => 'Maintenance request created successfully.',
-                'data' => $maintenance
+                'data' => $maintenance,
+                'status' => 'pending'
             ], 201);
         }
         // Handle validation failures
