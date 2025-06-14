@@ -28,6 +28,9 @@ class AuthController extends Controller
         if (!$user || $request->password != $user->password) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
+        
+        // delete previous tokens
+        $user->tokens()->delete();
         // Load current assignment and vehicle
         $user->load(['currentVehicleAssignments.vehicle']);
         $assignment = $user->currentVehicleAssignments;
