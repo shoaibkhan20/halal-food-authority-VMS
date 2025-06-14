@@ -26,8 +26,7 @@
 
 # keep .env for production (optional but needed for cPanel auto-deploy)
 # comment out the line below
-# .env
-
+.env
 # cache (keep these for cpanel)
 !bootstrap/cache/*.php
 
