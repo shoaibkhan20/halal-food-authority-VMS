@@ -50,13 +50,10 @@ class AuthController extends Controller
         return response()->json($response);
     }
 
-
-
     public function me(Request $request)
     {
         try {
             $user = $request->user();
-
             if (!$user) {
                 throw new UnauthorizedHttpException('Bearer', 'Invalid user or token, kindly login first');
             }

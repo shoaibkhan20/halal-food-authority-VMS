@@ -141,7 +141,7 @@
                             <select name="branch_id" class="select select-bordered w-full" >
                                 <option value="" hidden>Select Branch</option>
                                 @foreach($branches as $branch)
-                                    <option value="{{ $branch->id }}">{{ $branch->name }} ({{ $branch->district }})</option>
+                                    <option value="{{ $branch->id }}">{{ $branch->name }} - ({{$branch->division}} - {{$branch->district}})</option>
                                 @endforeach
                             </select>
                         </div>
