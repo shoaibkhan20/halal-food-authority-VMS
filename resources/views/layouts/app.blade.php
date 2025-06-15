@@ -11,10 +11,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="flex min-h-screen bg-gray-100">
+<body class="flex min-h-screen bg-gray-100 w-full">
     <!-- Sidebar -->
     <aside id="menu"
-        class="hidden md:flex sticky left-0 top-0 w-64 h-screen bg-green-900 text-white  flex-col items-center py-6">
+        class="hidden md:flex sticky left-0 top-0 w-[20%] h-screen bg-green-900 text-white  flex-col items-center py-6 ">
         <a href="{{ route('home') }}"> <img src="{{ asset('images/logo.png') }}" class="h-20 mb-6" alt="Logo"></a>
         @if(Auth::User()->role->role_name == 'super-admin')
             <nav class="space-y-4 font-medium w-full px-6">
@@ -234,7 +234,7 @@
         @endif
     </aside>
     <!-- Main Content -->
-    <main class="flex-1">
+    <main class="flex-1 w-[80%]">
         <div class="w-full h-full bg-cover bg-bottom relative overflow-y-auto p-10">
             @yield('content')
         </div>

@@ -152,7 +152,7 @@
                     <input type="radio" name="my_tabs_3" class="tab" aria-label="Requests History" />
                     <div class="tab-content bg-base-100 border-base-300 p-6">
                         @php
-                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region','Date', 'Status'];
+                            $headers = ['Reg ID', 'Request Description', 'Estimated Cost', 'Applied By', 'Region','Date','Reason', 'Status'];
                             $rows = $pendingRequests
                                 ->filter(fn($r) => in_array($r->status, ['committee_rejected', 'final_approved', 'final_rejected'])) // 🔥 Status filter here
                                 ->map(function ($record) {
@@ -162,8 +162,12 @@
                                     $appliedBy = $record->appliedBy->name ?? 'N/A';
                                     $region = $record->vehicle->branch->district ?? 'N/A';
                                     $date = $record->updated_at->format('Y-m-d');
+                                    $reason = '-';
+                                    if($record->status != 'final_approved'){
+                                        $reason = $record->director_rejection_message ?? $record->committe_rejection_message;
+                                    }
                                     $rejectionReason = $record->status;
-                                    return [$regId, $issue, $cost, $appliedBy, $region,$date, $rejectionReason];
+                                    return [$regId, $issue, $cost, $appliedBy, $region,$date,$reason, $rejectionReason];
                                 })->toArray();
                         @endphp
                         <x-table :headers="$headers" :rows="$rows" />

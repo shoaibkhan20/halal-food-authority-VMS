@@ -25,9 +25,9 @@ class RequestsController extends Controller
                 'comment' => 'nullable|string',
             ]);
 
-            // Check for existing request with same regId and status != final_approved
+            // Check for existing request with same regId and status = pending
             $existing = MaintenanceRequest::where('vehicle_id', $validated['regId'])
-                ->where('status', '!=', 'final_approved')
+                ->where('status',  'pending')
                 ->exists();
 
             if ($existing) {
@@ -104,7 +104,6 @@ class RequestsController extends Controller
                     return response()->json(['error' => 'Failed to upload invoice image.'], 500);
                 }
             }
-
             $fuelRequest = FuelRequest::create([
                 'vehicle_id' => $request->regId,
                 'user_id' => $request->user()->id,
@@ -115,12 +114,10 @@ class RequestsController extends Controller
                 'invoice' => $invoicePath,
                 'fuel_date' => Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d'),
             ]);
-
             return response()->json([
                 'message' => 'Fuel request created successfully',
                 'fuel_request' => $fuelRequest,
             ]);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'error' => 'Validation failed',

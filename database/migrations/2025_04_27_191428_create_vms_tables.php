@@ -87,7 +87,6 @@ class CreateVmsTables extends Migration
             $table->timestamp('timestamp');
             $table->timestamps();
         });
-
         // 8. Logbooks Table
         Schema::create('logbooks', function (Blueprint $table) {
             $table->id();
