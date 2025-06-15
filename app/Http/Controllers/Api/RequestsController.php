@@ -50,26 +50,21 @@ class RequestsController extends Controller
         // Handle validation failures
         catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Validation error.',
-                'errors' => $e->errors(),
+                'message' => 'Validation error: ' . json_encode($e->errors()),
             ], 422);
-        }
-        // Handle foreign key or DB-level issues
-        catch (QueryException $e) {
-            Log::error('Database error while creating maintenance request: ' . $e->getMessage());
+        } catch (QueryException $e) {
+            Log::error('Database error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'A database error occurred.',
-                'error' => $e->getMessage()
+                'message' => 'Database error: ' . $e->getMessage(),
             ], 500);
-        }
-        // Handle any other unexpected exception
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Unexpected error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'An unexpected error occurred.',
-                'error' => $e->getMessage()
+                'message' => 'Unexpected error: ' . $e->getMessage(),
             ], 500);
         }
-    }
 
+    }
 }
+
+
