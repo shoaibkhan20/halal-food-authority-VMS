@@ -8,10 +8,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 use App\Models\MaintenanceRequest;
-
+use App\Models\FuelRequest;
+use Illuminate\Support\Facades\Validator;
+use Exception;
+use Carbon\Carbon;
 class RequestsController extends Controller
 {
-    public function store(Request $request)
+    public function MaintenanceRequest(Request $request)
     {
         try {
             // Validate input
@@ -63,8 +66,86 @@ class RequestsController extends Controller
                 'message' => 'Unexpected error: ' . $e->getMessage(),
             ], 500);
         }
-
     }
+
+    public function fuelRequest(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'regId' => 'required|exists:vehicles,RegID',
+                'liter' => 'required|numeric|min:0',
+                'pricePerLiter' => 'required|numeric|min:0',
+                'total' => 'required|numeric|min:0',
+                'date' => 'required|date_format:d-m-Y',
+                'billImage' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            ]);
+
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            // 🚫 Prevent if there's already a pending request for this regId
+            $pendingRequest = FuelRequest::where('vehicle_id', $request->regId)
+                ->where('status', 'pending')
+                ->first();
+
+            if ($pendingRequest) {
+                return response()->json([
+                    'message' => 'Please wait, your application is already in process.'
+                ], 409); // 409 = Conflict
+            }
+
+            $invoicePath = null;
+            if ($request->hasFile('billImage')) {
+                try {
+                    $invoicePath = asset('storage/' . $request->file('billImage')->store('invoices', 'public'));
+                } catch (Exception $e) {
+                    Log::error('File upload failed: ' . $e->getMessage());
+                    return response()->json(['error' => 'Failed to upload invoice image.'], 500);
+                }
+            }
+
+            $fuelRequest = FuelRequest::create([
+                'vehicle_id' => $request->regId,
+                'user_id' => $request->user()->id,
+                'liter' => $request->liter,
+                'price_per_liter' => $request->pricePerLiter,
+                'fuel_amount' => $request->total,
+                'status' => 'pending',
+                'invoice' => $invoicePath,
+                'fuel_date' => Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d'),
+            ]);
+
+            return response()->json([
+                'message' => 'Fuel request created successfully',
+                'fuel_request' => $fuelRequest,
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->errors()
+            ], 422);
+
+        } catch (QueryException $e) {
+            Log::error('Database error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Database error',
+                'message' => $e->getMessage()
+            ], 500);
+
+        } catch (Exception $e) {
+            Log::error('Unexpected error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'An unexpected error occurred',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+
 }
 
 

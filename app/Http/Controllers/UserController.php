@@ -8,7 +8,7 @@ use App\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use App\Models\VehicleAssignment;
+
 class UserController extends Controller
 {
     // Display all users
@@ -91,21 +91,11 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
-
         if (!$user) {
             return response()->json(['message' => 'User not found.'], 404);
         }
-        // ✅ Check and end only if active assignments exist
-        $activeAssignments = VehicleAssignment::where('user_id', $user->id)
-            ->whereNull('returned_date');
-        if ($activeAssignments->exists()) {
-            $activeAssignments->update(['returned_date' => now()]);
-        }
-        // ✅ Soft-delete the user
         $user->delete();
-        return response()->json(['message' => 'User deleted and active assignment(s) ended (if any).'], 200);
+        return response()->json(['message' => 'User deleted successfully.'], 200);
     }
-
-
 
 }

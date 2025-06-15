@@ -151,15 +151,18 @@ class CreateVmsTables extends Migration
             $table->timestamps();
         });
 
-
         // 12. Fuel Requests Table
         Schema::create('fuel_requests', function (Blueprint $table) {
             $table->id();
             $table->string('vehicle_id');
             $table->foreign('vehicle_id')->references('RegID')->on('vehicles')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->decimal('liter',8,2);
+            $table->decimal('price_per_liter',8,2);
             $table->decimal('fuel_amount', 8, 2);
             $table->string('status')->default('pending');
+            $table->string('invoice')->nullable();
+            $table->date('fuel_date')->nullable();
             $table->timestamps();
         });
     }
