@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // ✅ Global middleware: runs on all routes
         $middleware->append([
-            \App\Http\Middleware\BlockMobileDevices::class,
+            // \App\Http\Middleware\BlockMobileDevices::class,
         ]);
 
         // ✅ Route middleware aliases

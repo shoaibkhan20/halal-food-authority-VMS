@@ -11,7 +11,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="flex min-h-screen bg-gray-100 w-full">
+<body class="hidden sm:flex min-h-screen bg-gray-100 w-full">
     <!-- Sidebar -->
     <aside id="menu"
         class="hidden md:flex sticky left-0 top-0 w-[20%] h-screen bg-green-900 text-white  flex-col items-center py-6 ">
