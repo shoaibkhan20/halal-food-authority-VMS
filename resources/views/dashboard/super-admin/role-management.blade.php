@@ -2,7 +2,7 @@
 @section('content')
 
     <div class="w-full min-h-screen grid place-items-center">
-        <div class="relative w-full h-full rounded-lg bg-white backdrop:bg-gray/50">
+        <div class="relative w-full h-full overflow-y-auto rounded-lg bg-white backdrop:bg-gray/50">
             <div class="flex flex-col w-full p-8">
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-3xl font-bold">Role Management</h1>

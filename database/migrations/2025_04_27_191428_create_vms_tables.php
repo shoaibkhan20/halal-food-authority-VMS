@@ -161,6 +161,7 @@ class CreateVmsTables extends Migration
             $table->decimal('fuel_amount', 8, 2);
             $table->string('status')->default('pending');
             $table->string('invoice')->nullable();
+            $table->string('payment_method')->nullable();
             $table->date('fuel_date')->nullable();
             $table->timestamps();
         });

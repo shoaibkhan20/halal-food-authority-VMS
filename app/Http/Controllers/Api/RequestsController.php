@@ -14,6 +14,7 @@ use Exception;
 use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 class RequestsController extends Controller
 {
     public function MaintenanceRequest(Request $request)
@@ -79,6 +80,7 @@ class RequestsController extends Controller
                 'total' => 'required|numeric|min:0',
                 'date' => 'required|date_format:d-m-Y',
                 'billImage' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'paymentMethod'=>'nullable|string'
             ]);
 
             if ($validator->fails()) {
@@ -113,6 +115,7 @@ class RequestsController extends Controller
                 'fuel_amount' => $request->total,
                 'status' => 'pending',
                 'invoice' => $invoicePath,
+                'payment_method' => $request->paymentMethod,
                 'fuel_date' => Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d'),
             ]);
             return response()->json([
@@ -187,6 +190,63 @@ class RequestsController extends Controller
             return response()->json(['message' => 'An unexpected error occurred.'], 500);
         }
     }
+
+    public function deleteMaintenance($ReqId)
+    {
+        try {
+            // Find the maintenance request
+            $request = MaintenanceRequest::findOrFail($ReqId);
+
+            // Check if status is 'pending'
+            if ($request->status !== 'pending') {
+                return response()->json(['message' => 'Only pending requests can be deleted'], 400);
+            }
+            // Attempt deletion
+            $request->delete();
+            return response()->json(['message' => 'Maintenance request deleted successfully'], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Maintenance request not found'], 404);
+
+        } catch (\PDOException $e) {
+            Log::error('Database error while deleting maintenance request: ' . $e->getMessage());
+            return response()->json(['message' => 'Database error occurred'], 500);
+
+        } catch (Exception $e) {
+            Log::error('Unexpected error while deleting maintenance request: ' . $e->getMessage());
+            return response()->json(['message' => 'Unexpected error occurred'], 500);
+        }
+    }
+
+
+    public function deleteFuelRequest($ReqId)
+    {
+        try {
+            // Find the fuel request
+            $request = FuelRequest::findOrFail($ReqId);
+
+            // Check status
+            if ($request->status !== 'pending') {
+                return response()->json(['message' => 'Only pending fuel requests can be deleted'], 400);
+            }
+            // Attempt deletion
+            $request->delete();
+
+            return response()->json(['message' => 'Fuel request deleted successfully'], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Fuel request not found'], 404);
+
+        } catch (\PDOException $e) {
+            Log::error('Database error while deleting fuel request: ' . $e->getMessage());
+            return response()->json(['message' => 'Database error occurred'], 500);
+
+        } catch (Exception $e) {
+            Log::error('Unexpected error while deleting fuel request: ' . $e->getMessage());
+            return response()->json(['message' => 'Unexpected error occurred'], 500);
+        }
+    }
+
 
 
 

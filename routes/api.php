@@ -16,6 +16,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/maintenance/request',[RequestsController::class,'MaintenanceRequest']);
     Route::post('/fuel/request',[RequestsController::class,'fuelRequest']);
     Route::get('/requests',[RequestsController::class,'getUserRequests']);
+    Route::delete('/fuel/delete/{id}', [RequestsController::class, 'deleteFuelRequest']);
+    Route::delete('/maintenance/delete/{id}', [RequestsController::class, 'deleteMaintenance']);
+
     Route::post('/logbook',[LogBookController::class,'store']);
     Route::get('/logbook',[LogBookController::class,'getLogbook']);
 });

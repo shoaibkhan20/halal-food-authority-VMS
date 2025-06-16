@@ -86,4 +86,8 @@ class LogBookController extends Controller
         return response()->json(['message' => 'log books retrived', 'data' => $logbook], 200);
     }
 
+    
+
+    
+
 }

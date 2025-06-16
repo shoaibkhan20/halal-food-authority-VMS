@@ -28,10 +28,11 @@
                 <a href="{{ route('vehicle.maintenance') }}"
                     class="border-b block py-2 px-4  {{ request()->routeIs('vehicle.maintenance') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Maintenance
                 </a>
-
                 <a href="{{ route('users.role-management') }}"
                     class="border-b block py-2 px-4  {{ request()->routeIs('users.role-management') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">User
                     Role Management</a>
+                <a href="{{ route('logbooks') }}"
+                    class="border-b block py-2 px-4  {{ request()->routeIs('logbooks') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Log Books</a>
                 @php
                     $isReportOpen = request()->routeIs('report.vehicle-status') || request()->routeIs('report.maintenance') || request()->routeIs('reports');
                 @endphp
@@ -74,6 +75,9 @@
                     Tracking</a>
                 <a href="{{ route('vehicle.maintenance') }}"
                     class="border-b block py-2 px-4  {{ request()->routeIs('vehicle.maintenance') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Maintenance</a>
+                <a href="{{ route('fuel-requests') }}"
+                    class="border-b block py-2 px-4  {{ request()->routeIs('fuel-requests') ? 'bg-white text-green-800' : 'hover:bg-green-800' }}">Fuel Requests
+                </a>
                 @php
                     $isReportOpen = request()->routeIs('report.vehicle-status') || request()->routeIs('report.maintenance') || request()->routeIs('reports');
                 @endphp

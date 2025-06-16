@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\LogBookController;
+use App\Http\Controllers\FuelRequestsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ReportController;
@@ -25,19 +27,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/vehicle/{regid}', [VehicleController::class, 'details'])->name('vehicle.details');
+
     // Route::get('/vehicles/search', [VehicleController::class, 'searchVehicle'])->name('vehicles.search');
 
-    
-     //vehicle info
-    Route::middleware('role:super-admin,director-admin,committe-user,vehicle-supervisor')->group(function(){
+    //vehicle info
+    Route::middleware('role:super-admin,director-admin,committe-user,vehicle-supervisor')->group(function () {
         Route::get('/vehicles', [VehicleController::class, 'vehicles'])->name('vehicles.info');
     });
     //vehicle tracking
-    Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function(){
+    Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function () {
         Route::get('/tracking', [VehicleController::class, 'tracking'])->name('vehicle.tracking');
     });
     // review maintenance
-     Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function () {
+    Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('vehicle.maintenance');
     });
     Route::middleware('role:super-admin,director-admin,committe-user,divisional-user')->group(function () {
@@ -66,10 +68,14 @@ Route::middleware('auth')->group(function () {
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/delete-user/{user}', [UserController::class, 'destroy'])->name('users.delete');
         Route::delete('/delete-vehicle/{id}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
+        Route::get('/logbooks', [VehicleController::class, 'showLogbooks'])->name('logbooks');
     });
     //  Director Admin
     Route::prefix('director-admin')->middleware('role:director-admin')->group(function () {
         Route::get('/', [DashboardController::class, 'dashboardStatistics'])->name('director-admin.dashboard');
+        Route::get('/fuel-request', [FuelRequestsController::class, 'index'])->name('fuel-requests');
+        Route::post('/fuel-request/approve/{id}', [FuelRequestsController::class, 'approveFuelRequest'])->name('fuel-requests.approve');
+        Route::post('/fuel-request/reject/{id}', [FuelRequestsController::class, 'rejectFuelRequest'])->name('fuel-requests.reject');
     });
     //  Committe User
     Route::prefix('committe-user')->middleware('role:committe-user')->group(function () {

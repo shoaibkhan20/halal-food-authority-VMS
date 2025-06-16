@@ -640,6 +640,7 @@ namespace App\Models {
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property string|null $fuel_date
+     * @property string|null $payment_method
      * @property string|null $invoice
      * @property string $status
      * @property float $fuel_amount
@@ -658,6 +659,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<FuelRequest>|FuelRequest whereFuelAmount($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FuelRequest>|FuelRequest whereStatus($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FuelRequest>|FuelRequest whereInvoice($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<FuelRequest>|FuelRequest wherePaymentMethod($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FuelRequest>|FuelRequest whereFuelDate($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FuelRequest>|FuelRequest whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<FuelRequest>|FuelRequest whereUpdatedAt($value)

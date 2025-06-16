@@ -13,7 +13,8 @@ use App\Models\VehicleMaintenance;
 use App\Models\Branch;
 use App\Models\User;
 use App\Models\VehicleAssignment;
-
+use App\Models\Logbook;
+use Illuminate\Support\Facades\Log;
 class VehicleController extends Controller
 {
 
@@ -190,7 +191,7 @@ class VehicleController extends Controller
         });
         return redirect()->back()->with('success', 'Vehicle deallocated successfully.');
     }
-    
+
     public function details($regid)
     {
         $vehicle = Vehicle::with(['latestAssignment.user', 'maintenanceRecords', 'branch'])->where('RegID', $regid)->firstOrFail();
@@ -307,6 +308,27 @@ class VehicleController extends Controller
 
         return redirect()->route('vehicles.info')->with('success', 'Vehicle deleted and active assignment(s) ended.');
     }
+
+
+
+
+
+
+    public function showLogbooks()
+    {
+        try {
+            $logbooks = Logbook::with(['user', 'vehicle']) // optional if you want names
+                ->latest()
+                ->get();
+
+            return view('dashboard.super-admin.logbook', compact('logbooks'));
+
+        } catch (\Exception $e) {
+            Log::error('Error loading logbooks: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load logbook data.');
+        }
+    }
+
 
 
 }
