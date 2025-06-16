@@ -171,8 +171,8 @@ class RequestsController extends Controller
             return response()->json([
                 'message' => 'Requests retrieved successfully',
                 'data' => [
-                    'fuel_requests' => $fuelRequests,
-                    'maintenance_requests' => $maintenanceRequests,
+                    'fuelRequests' => $fuelRequests,
+                    'maintenanceRequests' => $maintenanceRequests,
                 ]
             ]);
 
