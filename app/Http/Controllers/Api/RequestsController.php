@@ -12,6 +12,8 @@ use App\Models\FuelRequest;
 use Illuminate\Support\Facades\Validator;
 use Exception;
 use Carbon\Carbon;
+use Illuminate\Auth\AuthenticationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 class RequestsController extends Controller
 {
     public function MaintenanceRequest(Request $request)
@@ -24,10 +26,9 @@ class RequestsController extends Controller
                 'estimatedCost' => 'nullable|numeric',
                 'comment' => 'nullable|string',
             ]);
-
             // Check for existing request with same regId and status = pending
             $existing = MaintenanceRequest::where('vehicle_id', $validated['regId'])
-                ->where('status',  'pending')
+                ->where('status', 'pending')
                 ->exists();
 
             if ($existing) {
@@ -143,6 +144,51 @@ class RequestsController extends Controller
 
 
 
+
+    public function getUserRequests(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                throw new AuthenticationException('User not authenticated or invalid token.');
+            }
+
+            // Wrap DB operations in a try-catch
+            try {
+                $fuelRequests = FuelRequest::where('user_id', $user->id)
+                    ->latest()
+                    ->get();
+
+                $maintenanceRequests = MaintenanceRequest::where('applied_by', $user->id)
+                    ->latest()
+                    ->get();
+            } catch (QueryException $e) {
+                Log::error('Database query error: ' . $e->getMessage());
+                return response()->json(['message' => 'Database error occurred.'], 500);
+            }
+
+            return response()->json([
+                'message' => 'Requests retrieved successfully',
+                'data' => [
+                    'fuel_requests' => $fuelRequests,
+                    'maintenance_requests' => $maintenanceRequests,
+                ]
+            ]);
+
+        } catch (AuthenticationException $e) {
+            return response()->json(['message' => $e->getMessage()], 401);
+
+        } catch (HttpException $e) {
+            return response()->json(['message' => 'HTTP Error: ' . $e->getMessage()], $e->getStatusCode());
+
+        } catch (\Exception $e) {
+            Log::error('Unexpected error: ' . $e->getMessage());
+            return response()->json(['message' => 'An unexpected error occurred.'], 500);
+        }
+    }
+
+
+
+
 }
-
-

@@ -22,8 +22,8 @@ class LogBookController extends Controller
                 'LocationFrom' => 'required|string|max:255',
                 'LocationTo' => 'required|string|max:255',
                 'description' => 'nullable|string',
-                'distance_covered' => 'nullable|integer',
-                'fuelConsumeInLtr' => 'nullable|numeric',
+                'distance_covered' => 'nullable|string',
+                'fuelConsumeInLtr' => 'nullable|string',
                 'date' => 'required|date_format:d-m-Y',
             ]);
             $userId = $request->user()->id;
@@ -69,6 +69,21 @@ class LogBookController extends Controller
                 'message' => 'An unexpected error occurred. Please try again later.'
             ], 500);
         }
+    }
+
+    public function getLogbook(Request $request)
+    {
+        $userId = $request->user()->id;
+        if (!$userId) {
+            return response()->json(['message' => 'invalid user token']);
+        }
+        $logbook = Logbook::where('user_id', $userId)
+            ->
+            get();
+        if (!$logbook) {
+            return response()->json(['message' => 'no logbooks by user']);
+        }
+        return response()->json(['message' => 'log books retrived', 'data' => $logbook], 200);
     }
 
 }
